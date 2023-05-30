@@ -2,7 +2,7 @@
 mkdir micromamba
 cd micromamba
 
-curl -Ls https://micro.mamba.pm/api/micromamba/osx-64/latest | tar -xvj bin/micromamba
+curl -Ls https://github.com/mamba-org/micromamba-releases/releases/download/1.4.3-0/micromamba-osx-64.tar.bz2 | tar -xvj bin/micromamba
 
 export MAMBA_EXE="$(pwd)/bin/micromamba"
 export MAMBA_ROOT_PREFIX="$(pwd)/micromamba"
