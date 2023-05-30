@@ -129,4 +129,4 @@ dmypy.json
 .pyre/
 
 # infrastructure/apps
-apps/
+infrastructure/apps/micromamba/
