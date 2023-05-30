@@ -127,3 +127,6 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# infrastructure/apps
+infrastructure/apps/micromamba/
