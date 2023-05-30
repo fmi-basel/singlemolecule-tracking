@@ -1,0 +1,12 @@
+name: tracking_analysis
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.9
+  - scikit-image
+  - numpy
+  - matplotlib
+  - pandas
+  - seaborn-base
+  - jupyter
