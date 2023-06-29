@@ -1,98 +1,170 @@
+from multiprocessing import Pool
+import os
 from tifffile import imread
 from skimage.morphology import disk
-from matplotlib.colors import ListedColormap
 import pandas as pd
 import numpy as np
-from matplotlib import pyplot as plt
 from skimage.morphology import h_maxima
-from skimage.measure import regionprops
-from spot_detection_utils import subpixel_localization, get_spot
+import yaml
+from spot_detection_utils import subpixel_localization_2d, get_spot
 
+from numpy.typing import ArrayLike
 
+from tqdm import tqdm
+import logging
+from datetime import datetime
 
-def main(file, file2, frame):
-    image = imread(file)
-    mask = imread(file2)
+logger = logging.Logger('Spot Detection')
+now = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+handler = logging.FileHandler(f"{now}-spot-detection.log")
+handler.setLevel(logging.INFO)
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+handler.setFormatter(formatter)
+logger.addHandler(handler)
+
+def load_data(img_file: str, mask_file: str):
+    """Load denoised and raw image.
     
-    # TODO: Add functionality from spot_detection.ipynb
+    Parameter:
+        img_file: Path to image file.
+        mask_file: Path to mask file.
 
-    denoised_img = image[:, 0]
-    raw_img = image[:, 1]
-    plt.imshow(mask > 0)
+    Retruns:
+        denoised_img: Loaded denoised image data
+        raw_img: Loaded raw image data
+        mask: Cell instance masks
+    """
+    img = imread(img_file)
+    mask = imread(mask_file)
 
-    # Mask out foreground (mask > 0) --> go from instance segmentation to semantic segmentation (fg vs bg)
-    masked_cells = denoised_img * (mask > 0)
+    denoised_img = img[:, 0]
+    raw_img = img[:, 1]
 
-    plt.figure(figsize=(10,10))
-    plt.imshow(masked_cells[frame], cmap='gray')
+    return denoised_img, raw_img, mask
 
-    # H-max spot detection with std as threshold
 
-    threshold = int(np.std(denoised_img[frame, mask > 0]))
-    spots = h_maxima(image=denoised_img[frame], footprint=disk(1), h=threshold)
-    spots = spots * (mask > 0)
-    
-    spot_cmap = ListedColormap([[0, 0, 0, 0], [1, 0, 0, 1]])
-    
-    plt.figure(figsize=(10, 5))
-    plt.subplot(1,2,1)
-    plt.imshow(masked_cells[frame], cmap='gray')
-    plt.subplot(1,2,2)
-    plt.imshow(masked_cells[frame], cmap='gray')
-    plt.imshow(spots, cmap=spot_cmap)
+def apply_hmax(denoised_slice: ArrayLike, mask: ArrayLike):
+    """H-max spot detection with std as threshold."""
+    threshold = int(np.std(denoised_slice[mask > 0]))
+    spots = h_maxima(image=denoised_slice, footprint=disk(1), h=threshold)
+    return spots * (mask > 0)
 
-    # Assign spots to ROIs
+
+def assign_spots_to_ROIs(spots: ArrayLike, mask: ArrayLike):
     spots_per_roi = []
     roi_labels = list(filter(None, np.unique(mask)))
 
     for label_id in roi_labels:
         spots_per_roi.append(np.where(spots * (mask == label_id)))
-        
 
-    # subpixel localization of spots and visualization
-    spot_size = 3
+    return spots_per_roi, roi_labels
 
+
+def refine_spots(spots_per_roi: list, roi_labels: list, denoised_slice: ArrayLike, frame: int):
     subpix_spots = {}
     for roi_id, (y_coords, x_coords) in zip(roi_labels, spots_per_roi):
         subpix_spots[roi_id] = []
         for y, x in zip(y_coords, x_coords):
-            spot_img, start_y, start_x = get_spot(denoised_img[frame], [y, x], size=5)
-            y_loc, x_loc = subpixel_localization(spot_img)
-            subpix_spots[roi_id].append([start_y + y_loc, start_x + x_loc])
-    
-    features = regionprops(mask)
-
-    # Overlay subpixel localized spots on raw image frame.
-    marker_style = dict(color='tab:red', linestyle=':', marker='o',
-                        markersize=15, markerfacecoloralt='tab:red')
-
-    for prop in features:
-        box = prop.bbox
-        plt.imshow((raw_img[frame] * (mask == prop.label))[box[0]:box[2], box[1]:box[3]])
-        for y, x in subpix_spots[prop.label]:
-            plt.plot(x - box[1], y- box[0], fillstyle='none', **marker_style)
-
-        plt.title(f'ROI {prop.label}')
-        plt.show()
+            spot_img, start_y, start_x = get_spot(denoised_slice, [y, x], size=5)
+            bg, amp, x_loc, y_loc, sig_x, sig_y = subpixel_localization_2d(spot_img, spacing=(1, 1))
+            subpix_spots[roi_id].append([start_y + y_loc, start_x + x_loc, bg, amp, sig_y, sig_x])
 
     dfs = []
     for roi_id in subpix_spots:
-        spot_df = pd.DataFrame(subpix_spots[roi_id], columns=['y', 'x'])
+        spot_df = pd.DataFrame(subpix_spots[roi_id], columns=['y', 'x', 'bg_denoised', 'amp_denoised', 'sigma_y', 'sigma_x'])
         spot_df['roi_id'] = roi_id
         spot_df['frame'] = frame
 
         dfs.append(spot_df)
 
     spots_for_frame_df = pd.concat(dfs, ignore_index=True)
-    spots_for_frame_df = spots_for_frame_df.reindex(columns=['frame', 'roi_id', 'x', 'y'])
+    return spots_for_frame_df.reindex(columns=['frame', 'roi_id', 'x', 'y', 'bg_denoised', 'amp_denoised', 'sigma_y', 'sigma_x'])
 
+
+def get_raw_spot_intensity_computer(
+        raw_img: ArrayLike,
+):
+    def raw_spot_intensity_computer(row):
+        y, x = row[['y', 'x']]
+        y, x = int(np.round(y)), int(np.round(x))
+
+        sum_intensity = np.mean(raw_img[y-1:y+1, x-1:x+1])
+
+        return sum_intensity / 9.
+    
+    return raw_spot_intensity_computer
+
+
+def detect_spots_in_frame(denoised_slice: ArrayLike, raw_slice: ArrayLike, mask: ArrayLike, frame: int):
+    logger.info(f"Processing frame #{frame}.")
+    spots = apply_hmax(
+            denoised_slice=denoised_slice, 
+            mask=mask, 
+        )
+
+    spots_per_roi, roi_labels = assign_spots_to_ROIs(
+        spots=spots, 
+        mask=mask,
+    )
+
+    spots_for_frame_df = refine_spots(
+        spots_per_roi=spots_per_roi,
+        roi_labels=roi_labels,
+        denoised_slice=denoised_slice,
+        frame=frame,
+    )
+
+    spots_for_frame_df['mean_spot_intensity'] = spots_for_frame_df.apply(get_raw_spot_intensity_computer(raw_slice), axis=1)
     return spots_for_frame_df
+
+
+def detect_spots_in_2DTime(img_file: str, mask_file: str):
+
+    denoised_img, raw_img, mask = load_data(
+        img_file=img_file,
+        mask_file=mask_file,
+    )
+
+    futures = []
+    progress = tqdm(total=denoised_img.shape[0], smoothing=0.0)
+    pool = Pool(8)
+    for frame in range(denoised_img.shape[0]):
+        futures.append(
+            pool.apply_async(
+                detect_spots_in_frame,
+                kwds={
+                    "denoised_slice": denoised_img[frame],
+                    "raw_slice": raw_img[frame],
+                    "mask": mask,
+                    "frame": frame,
+                },
+                callback=lambda _: progress.update(),
+            )
+        )
+
+    pool.close()
+    pool.join()
+
+    dfs = []
+    for future in futures:
+        dfs.append(future.get())
+
+    return pd.concat(dfs)
 
 
 
 if __name__ == "__main__":
-    main(
-        file = '/Volumes/gchao/bamfaile/Analysis/TUBB2B-KI/Batch20230223/D21/Denoised/100tp_561-100-50ms-1000g_4_conf561_merged.tif',
-        file2 = '/Volumes/gchao/bamfaile/Analysis/TUBB2B-KI/Batch20230223/D21/ROIs/ROIs_as_mask_BIOP/100tp_561-100-50ms-1000g_4_conf561_merged_ROI1-18.tif',
-        frame = 10,
-           )
+    with open("spot_detection_config.yaml", "r") as f:
+        config = yaml.safe_load(f)
+    
+    logger.info(f"Running spot-detection with config: {config}")
+
+    spots_for_frames = detect_spots_in_2DTime(
+        img_file = config['img_file'],
+        mask_file = config['mask_file'],
+    )
+
+    name, _ = os.path.splitext(os.path.basename(config['img_file']))
+    spots_for_frames.to_csv(os.path.join(config['output_dir'], f"{name}_spots.csv"), index=False)
+
+    logger.info("Done!")
