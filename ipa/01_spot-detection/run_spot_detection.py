@@ -129,7 +129,7 @@ def detect_spots_in_2DTime(img_file: str, mask_file: str):
     )
 
     futures = []
-    progress = tqdm(total=denoised_img.shape[0], smoothing=0.0)
+    progress = tqdm(total=denoised_img.shape[0], smoothing=0.0, leave=False)
     pool = Pool(8)
     for frame in range(denoised_img.shape[0]):
         futures.append(
@@ -164,7 +164,8 @@ if __name__ == "__main__":
 
     img_files = glob(join(config['img_file'], '*.tif'))
 
-    for img_file in img_files:
+    for img_file in tqdm(img_files):
+        logger.info(f"Processing file: {img_file}")
         mask_file = join(config['mask_file'], basename(img_file).replace(".tif", "_ROIs.tif"))
 
         spots_for_frames = detect_spots_in_2DTime(
