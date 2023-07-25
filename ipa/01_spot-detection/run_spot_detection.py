@@ -1,5 +1,6 @@
 from multiprocessing import Pool
 import os
+from glob import glob
 from tifffile import imread
 from skimage.morphology import disk
 import pandas as pd
@@ -13,6 +14,8 @@ from numpy.typing import ArrayLike
 from tqdm import tqdm
 import logging
 from datetime import datetime
+
+from os.path import join, basename
 
 logger = logging.Logger('Spot Detection')
 now = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
@@ -159,10 +162,15 @@ if __name__ == "__main__":
     
     logger.info(f"Running spot-detection with config: {config}")
 
-    spots_for_frames = detect_spots_in_2DTime(
-        img_file = config['img_file'],
-        mask_file = config['mask_file'],
-    )
+    img_files = glob(join(config['img_file'], '*.tif'))
+
+    for img_file in img_files:
+        mask_file = join(config['mask_file'], basename(img_file).replace(".tif", "_ROIs.tif"))
+
+        spots_for_frames = detect_spots_in_2DTime(
+            img_file = img_file,
+            mask_file = mask_file,
+        )
 
     name, _ = os.path.splitext(os.path.basename(config['img_file']))
     spots_for_frames.to_csv(os.path.join(config['output_dir'], f"{name}_spots.csv"), index=False)
