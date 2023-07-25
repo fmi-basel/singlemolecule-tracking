@@ -16,6 +16,8 @@ def build_config():
         "output_dir": os.path.relpath(output_dir, cwd),
     }
 
+    os.makedirs(output_dir, exist_ok=False)
+
     with open(os.path.join(cwd, "spot_detection_config.yaml"), "w") as f:
         yaml.safe_dump(config, f)
 
