@@ -173,7 +173,7 @@ if __name__ == "__main__":
             mask_file = mask_file,
         )
 
-    name, _ = os.path.splitext(os.path.basename(config['img_file']))
-    spots_for_frames.to_csv(os.path.join(config['output_dir'], f"{name}_spots.csv"), index=False)
+        name, _ = os.path.splitext(os.path.basename(img_file))
+        spots_for_frames.to_csv(os.path.join(config['output_dir'], f"{name}_spots.csv"), index=False)
 
     logger.info("Done!")
