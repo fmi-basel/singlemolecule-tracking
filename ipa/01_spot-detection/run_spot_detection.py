@@ -2,10 +2,11 @@ from multiprocessing import Pool
 import os
 from glob import glob
 from tifffile import imread
-from skimage.morphology import disk
 import pandas as pd
 import numpy as np
-from skimage.morphology import h_maxima
+from skimage.morphology import h_maxima, disk
+from scipy.ndimage import gaussian_laplace
+from skimage.util import img_as_float32, img_as_uint
 import yaml
 from spot_detection_utils import subpixel_localization_2d, get_spot
 
@@ -46,10 +47,24 @@ def load_data(img_file: str, mask_file: str):
     return denoised_img, raw_img, mask
 
 
-def apply_hmax(denoised_slice: ArrayLike, mask: ArrayLike):
-    """H-max spot detection with std as threshold."""
+def normalize_minmse(x, target):
+    """Affine rescaling of x, such that the mean squared error to target is minimal."""
+    cov = np.cov(x.flatten(),target.flatten())
+    alpha = cov[0,1] / (cov[0,0]+1e-10)
+    beta = target.mean() - alpha*x.mean()
+    return alpha*x + beta
+
+
+def detect_spots(denoised_slice: ArrayLike, mask: ArrayLike, wavelength: int, NA: float, spacing: tuple[float, float]):
+    """Spot detection with LoG filter and h-maxima and std as threshold."""
+
     threshold = int(np.std(denoised_slice[mask > 0]))
-    spots = h_maxima(image=denoised_slice, footprint=disk(1), h=threshold)
+
+    sigma = wavelength/ ( 2 * NA ) / np.sqrt(2) / (spacing[1] * 1000)
+    log_img = -gaussian_laplace(img_as_float32(denoised_slice), sigma=sigma) * sigma**2
+    log_img = img_as_uint(normalize_minmse(log_img, img_as_float32(denoised_slice)))
+    spots = h_maxima(log_img, h=threshold, footprint=disk(int(sigma)))
+
     return spots * (mask > 0)
 
 
@@ -98,11 +113,15 @@ def get_raw_spot_intensity_computer(
     return raw_spot_intensity_computer
 
 
-def detect_spots_in_frame(denoised_slice: ArrayLike, raw_slice: ArrayLike, mask: ArrayLike, frame: int):
+def detect_spots_in_frame(denoised_slice: ArrayLike, raw_slice: ArrayLike, mask: ArrayLike, frame: int,
+                          NA: float, wavelength: int, spacing: tuple[float, float]):
     logger.info(f"Processing frame #{frame}.")
-    spots = apply_hmax(
+    spots = detect_spots(
             denoised_slice=denoised_slice, 
             mask=mask, 
+            NA=NA,
+            wavelength=wavelength,
+            spacing=spacing,
         )
 
     spots_per_roi, roi_labels = assign_spots_to_ROIs(
@@ -121,7 +140,8 @@ def detect_spots_in_frame(denoised_slice: ArrayLike, raw_slice: ArrayLike, mask:
     return spots_for_frame_df
 
 
-def detect_spots_in_2DTime(img_file: str, mask_file: str):
+def detect_spots_in_2DTime(img_file: str, mask_file: str,
+                           NA: float, wavelength: int, spacing: tuple[float, float]):
 
     denoised_img, raw_img, mask = load_data(
         img_file=img_file,
@@ -140,6 +160,9 @@ def detect_spots_in_2DTime(img_file: str, mask_file: str):
                     "raw_slice": raw_img[frame],
                     "mask": mask,
                     "frame": frame,
+                    "NA": NA,
+                    "wavelength": wavelength,
+                    "spacing": spacing,
                 },
                 callback=lambda _: progress.update(),
             )
@@ -171,6 +194,9 @@ if __name__ == "__main__":
         spots_for_frames = detect_spots_in_2DTime(
             img_file = img_file,
             mask_file = mask_file,
+            NA=config['NA'],
+            wavelength=config['wavelength'],
+            spacing=config['spacing']
         )
 
         name, _ = os.path.splitext(os.path.basename(img_file))
