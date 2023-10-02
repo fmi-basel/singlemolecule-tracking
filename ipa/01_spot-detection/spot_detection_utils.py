@@ -1,3 +1,4 @@
+import logging
 from scipy.ndimage import gaussian_filter
 from skimage.util import img_as_float32, img_as_uint
 from skimage.measure import centroid
@@ -6,17 +7,29 @@ from scipy.optimize import curve_fit
 import numpy as np
 
 
-def get_spot(img, coords, size=21):
+def get_spot(img, coords, size=21, logger: logging.Logger = logging.getLogger()):
     half_size = size // 2
 
-    assert 0 <= coords[0] - half_size, "Spot is too close to image boundary."
-    assert 0 <= coords[1] - half_size, "Spot is too close to image boundary."
-    assert coords[0] + half_size < img.shape[0], "Spot is too close to image boundary."
-    assert coords[1] + half_size < img.shape[1], "Spot is too close to image boundary."
+    def _warn():
+        logger.warning(f"Spot {coords} is close to image boundary. Spot detection might be inaccuarte.")
+
+    if 0 <= coords[0] - half_size:
+        _warn()
+
+    if 0 <= coords[1] - half_size:
+        _warn()
+
+    if coords[0] + half_size < img.shape[0]:
+        _warn()
+
+    if coords[1] + half_size < img.shape[1]:
+        _warn()
     
-    start_y = coords[0] - half_size
-    start_x = coords[1] - half_size
-    return img[start_y: start_y + size, start_x: start_x + size], start_y, start_x
+    start_y = max(coords[0] - half_size, 0)
+    start_x = max(coords[1] - half_size, 0)
+    end_y = min(start_y + size, img.shape[0])
+    end_x = min(start_x + size, img.shape[1])
+    return img[start_y: end_y, start_x: end_x], start_y, start_x
 
 
 def gauss_2d(bg, amp, mu_x, mu_y, sig_x, sig_y):

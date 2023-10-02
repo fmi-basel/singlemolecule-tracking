@@ -78,12 +78,12 @@ def assign_spots_to_ROIs(spots: ArrayLike, mask: ArrayLike):
     return spots_per_roi, roi_labels
 
 
-def refine_spots(spots_per_roi: list, roi_labels: list, denoised_slice: ArrayLike, frame: int):
+def refine_spots(spots_per_roi: list, roi_labels: list, denoised_slice: ArrayLike, frame: int, logger: logging.Logger):
     subpix_spots = {}
     for roi_id, (y_coords, x_coords) in zip(roi_labels, spots_per_roi):
         subpix_spots[roi_id] = []
         for y, x in zip(y_coords, x_coords):
-            spot_img, start_y, start_x = get_spot(denoised_slice, [y, x], size=5)
+            spot_img, start_y, start_x = get_spot(denoised_slice, [y, x], size=5, logger=logger)
             bg, amp, x_loc, y_loc, sig_x, sig_y = subpixel_localization_2d(spot_img, spacing=(1, 1))
             subpix_spots[roi_id].append([start_y + y_loc, start_x + x_loc, bg, amp, sig_y, sig_x])
 
@@ -134,6 +134,7 @@ def detect_spots_in_frame(denoised_slice: ArrayLike, raw_slice: ArrayLike, mask:
         roi_labels=roi_labels,
         denoised_slice=denoised_slice,
         frame=frame,
+        logger=logger,
     )
 
     spots_for_frame_df['mean_spot_intensity'] = spots_for_frame_df.apply(get_raw_spot_intensity_computer(raw_slice), axis=1)
