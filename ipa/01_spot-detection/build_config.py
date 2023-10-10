@@ -20,8 +20,8 @@ def build_config():
         "Spacing in xy [um]:",
         validate=lambda v: v.replace(".", "").isdigit()
     ).ask())
-    threshold = float(questionary.text(
-        "Threshold (float):",
+    k = float(questionary.text(
+        "Threshold factor (float):",
         validate=lambda v: v.replace(".", "").isdigit()
     ).ask())
 
@@ -32,7 +32,7 @@ def build_config():
         "NA": NA,
         "wavelength": wavelength,
         "spacing": (spacing, spacing),
-        "threshold": threshold
+        "k": k
     }
 
     os.makedirs(output_dir, exist_ok=False)
