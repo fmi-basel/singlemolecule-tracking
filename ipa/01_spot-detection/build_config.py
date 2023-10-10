@@ -20,6 +20,10 @@ def build_config():
         "Spacing in xy [um]:",
         validate=lambda v: v.replace(".", "").isdigit()
     ).ask())
+    threshold = float(questionary.text(
+        "Threshold (float):",
+        validate=lambda v: v.replace(".", "").isdigit()
+    ).ask())
 
     config = {
         "img_file": os.path.relpath(img_file, cwd),
@@ -27,7 +31,8 @@ def build_config():
         "output_dir": os.path.relpath(output_dir, cwd),
         "NA": NA,
         "wavelength": wavelength,
-        "spacing": (spacing, spacing)
+        "spacing": (spacing, spacing),
+        "threshold": threshold
     }
 
     os.makedirs(output_dir, exist_ok=False)

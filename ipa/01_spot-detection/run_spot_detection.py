@@ -55,13 +55,12 @@ def normalize_minmse(x, target):
     return alpha*x + beta
 
 
-def detect_spots(denoised_slice: ArrayLike, mask: ArrayLike, wavelength: int, NA: float, spacing: tuple[float, float]):
+def detect_spots(denoised_slice: ArrayLike, mask: ArrayLike, wavelength: int, NA: float, spacing: tuple[float, float], threshold: float):
     """Spot detection with LoG filter and h-maxima and std as threshold."""
 
     sigma = wavelength/ ( 2 * NA ) / np.sqrt(2) / (spacing[1] * 1000)
     log_img = -gaussian_laplace(img_as_float32(denoised_slice), sigma=sigma) * sigma**2
     log_img = img_as_uint(normalize_minmse(log_img, img_as_float32(denoised_slice)))
-    threshold = int(np.std(log_img[mask > 0]))
     spots = h_maxima(log_img, h=threshold, footprint=disk(int(sigma)))
 
     return spots * (mask > 0)
@@ -117,7 +116,7 @@ def get_raw_spot_intensity_computer(
 
 
 def detect_spots_in_frame(denoised_slice: ArrayLike, raw_slice: ArrayLike, mask: ArrayLike, frame: int,
-                          NA: float, wavelength: int, spacing: tuple[float, float]):
+                          NA: float, wavelength: int, spacing: tuple[float, float], threshold: float):
     logger.info(f"Processing frame #{frame}.")
     spots = detect_spots(
             denoised_slice=denoised_slice, 
@@ -125,6 +124,7 @@ def detect_spots_in_frame(denoised_slice: ArrayLike, raw_slice: ArrayLike, mask:
             NA=NA,
             wavelength=wavelength,
             spacing=spacing,
+            threshold=threshold
         )
 
     spots_per_roi, roi_labels = assign_spots_to_ROIs(
@@ -145,7 +145,7 @@ def detect_spots_in_frame(denoised_slice: ArrayLike, raw_slice: ArrayLike, mask:
 
 
 def detect_spots_in_2DTime(img_file: str, mask_file: str,
-                           NA: float, wavelength: int, spacing: tuple[float, float]):
+                           NA: float, wavelength: int, spacing: tuple[float, float], threshold:float):
 
     denoised_img, raw_img, mask = load_data(
         img_file=img_file,
@@ -167,6 +167,7 @@ def detect_spots_in_2DTime(img_file: str, mask_file: str,
                     "NA": NA,
                     "wavelength": wavelength,
                     "spacing": spacing,
+                    "threshold": threshold,
                 },
                 callback=lambda _: progress.update(),
             )
@@ -200,7 +201,8 @@ if __name__ == "__main__":
             mask_file = mask_file,
             NA=config['NA'],
             wavelength=config['wavelength'],
-            spacing=config['spacing']
+            spacing=config['spacing'],
+            threshold=config['threshold']
         )
 
         name, _ = os.path.splitext(os.path.basename(img_file))
