@@ -83,8 +83,12 @@ def refine_spots(spots_per_roi: list, roi_labels: list, denoised_slice: ArrayLik
         subpix_spots[roi_id] = []
         for y, x in zip(y_coords, x_coords):
             spot_img, start_y, start_x = get_spot(denoised_slice, [y, x], size=5, logger=logger)
-            bg, amp, x_loc, y_loc, sig_x, sig_y = subpixel_localization_2d(spot_img, spacing=(1, 1))
-            subpix_spots[roi_id].append([start_y + y_loc, start_x + x_loc, bg, amp, sig_y, sig_x])
+            try:
+                bg, amp, x_loc, y_loc, sig_x, sig_y = subpixel_localization_2d(spot_img, spacing=(1, 1))
+                subpix_spots[roi_id].append([start_y + y_loc, start_x + x_loc, bg, amp, sig_y, sig_x])
+            except RuntimeError as e:
+                logger.warning(e)
+                logger.info(f"Skipped spot at {y, x}. Could not compute sub-pixel localization.")
 
     dfs = []
     for roi_id in subpix_spots:
