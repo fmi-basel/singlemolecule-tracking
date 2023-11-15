@@ -114,6 +114,8 @@ if __name__ == "__main__":
         config = yaml.safe_load(f)
     
     logger.info(f"Running tracking with config: {config}")
+    tp.ignore_logging()
+    tp.logger = logger
 
     spots_files = glob(join(config['spots_file'], '*.csv'))
 
