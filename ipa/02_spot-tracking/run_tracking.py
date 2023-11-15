@@ -121,9 +121,9 @@ if __name__ == "__main__":
 
         tracks_per_img = linking(
             spots_file=spots_file,
-            link_distance=config['linkdis'],
+            link_distance=config['link_distance'],
             gaps=config['gaps'],
-            track_length=config['tracklen']
+            track_length=config['track_length']
         )
 
         tracks_per_img = add_track_id_column(tracks_per_img)
