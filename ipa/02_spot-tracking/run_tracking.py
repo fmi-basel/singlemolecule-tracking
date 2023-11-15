@@ -58,7 +58,8 @@ def linking(
     tracks_per_roi = []
 
     for df in spots_per_roi:
-        df = tp.link(df, link_distance, memory=gaps)
+        df = tp.link(df, link_distance, memory=gaps,
+                     adaptive_stop=2, adaptive_step=0.95)
         df = tp.filter_stubs(df, track_length)
         tracks_per_roi.append(df)
     
