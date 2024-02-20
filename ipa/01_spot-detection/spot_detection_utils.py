@@ -70,11 +70,11 @@ def subpixel_localization_2d(spot_img, spacing):
     
     try:
     	popt, pcov = curve_fit(
-        eval_gauss_2d,
-        coords_yx,
-        spot_img.ravel(),
-        p0=init_params,
-        bounds=bounds
+            eval_gauss_2d,
+            coords_yx,
+            spot_img.ravel(),
+            p0=init_params,
+            bounds=bounds
     	)
     except ValueError as e:
         print("Skipping spot. Could not compute sub-pixel localization.")
