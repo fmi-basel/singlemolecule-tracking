@@ -60,7 +60,13 @@ def detect_spots(denoised_slice: ArrayLike, mask: ArrayLike, wavelength: int, NA
 
     sigma = wavelength/ ( 2 * NA ) / np.sqrt(2) / (spacing[1] * 1000)
     log_img = -gaussian_laplace(img_as_float32(denoised_slice), sigma=sigma) * sigma**2
-    log_img = img_as_uint(normalize_minmse(log_img, img_as_float32(denoised_slice)))
+    log_img = img_as_uint(
+        np.clip(
+            normalize_minmse(log_img, img_as_float32(denoised_slice)),
+            -1,
+            1
+        )
+    )
     threshold = int(np.std(log_img[mask > 0])) * k
     spots = h_maxima(log_img, h=threshold, footprint=disk(int(sigma)))
 
