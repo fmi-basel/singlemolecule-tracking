@@ -1,0 +1,10 @@
+batch_size: 10
+epochs: 10
+n2v_model_name: n2v-model
+output_dir: ../../Data/gchao/n2v-testing
+patch_shape:
+- 96
+- 96
+train_data: ../../Data/gchao/n2v-testing/x_train_2D.npy
+unet_depth: 2
+val_data: ../../Data/gchao/n2v-testing/x_val_2D.npy

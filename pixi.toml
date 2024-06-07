@@ -12,12 +12,30 @@ platforms = ["linux-64"]
 linux="4.18"
 
 [tasks]
-source_status = { cmd = 'echo "Found $(git status --porcelain source | wc -l) untracked changes in ./source." && exit $(git status --porcelain source | wc -m)'}
-log_commit = {cmd = 'echo "[$(date -Iseconds)][Executing] $TASK [Git-Commit] $(git rev-parse --verify HEAD)" >> $WD/githash.log', depends_on=["source_status"], env = {TASK = ""}}
-build_config = { cmd = "mkdir -p $WD ; TASK=BUILD_CONFIG pixi run log_commit ; cd $WD ; echo 'Implementation Missing.'", env = { WD = "runs/example"}}
+source_status = { cmd = 'echo "Found $(git status --porcelain ipa | wc -l) untracked changes in ./ipa." && exit $(git status --porcelain ipa | wc -l)'}
+log_commit = {cmd = 'echo "[$(date -Iseconds)][Executing] $TASK [Git-Commit] $(git rev-parse --verify HEAD)" >> $WD/githash.log', env = {TASK = ""}}
+build_config = { cmd = "mkdir -p $WD ; TASK=BUILD_CONFIG pixi run log_commit ; cd $WD ; pixi run python ../../ipa/n2v/build_config.py", env = { WD = "runs/example"}}#, depends_on=["source_status"]}
+generate_data = { cmd = "TASK=GENERATE_DATA pixi run log_commit ; cd $WD ; pixi run -e n2v python ../../ipa/n2v/generate_train_data_2D.py", env = { WD = "runs/example"}}#, depends_on=["source_status"]}
+train = { cmd = "TASK=TRAIN pixi run log_commit ; cd $WD ; pixi run -e n2v python ../../ipa/n2v/train.py", env = { WD = "runs/example"}}#, depends_on=["source_status"]}
+predict = { cmd = "TASK=PREDICT pixi run log_commit ; cd $WD ; pixi run -e n2v python ../../ipa/n2v/predict.py", env={WD = "runs/example"}}#, depends_on=["source_status"]}
+submit_job = { cmd = "TASK=SUBMIT_JOB pixi run log_commit ; sbatch ipa/n2v/slurm-job_$JOB.sh $ACCOUNT $WD", env = { JOB = "", ACCOUNT = "", WD = ""}}#, depends_on=["source_status"]}
 
 [dependencies]
-python = "3.12"
+python = ">=3.9,<3.13"
+tqdm = ">=4.66.2,<4.67"
+tifffile = ">=2024.5.10,<2024.6"
+pyyaml = ">=6.0.1,<6.1"
+pydantic = ">=2.7.1,<3.0"
+scikit-image = ">=0.22.0,<0.23"
+questionary = ">=2.0.1,<2.1"
+bokeh = ">=3.4.1,<3.5"
+dask-image = ">=2024.5.3,<2024.6"
+dask = ">=2024.5.1,<2024.6"
+distributed = ">=2024.5.1,<2024.6"
+pixi-pycharm = ">=0.0.5,<0.1"
+
+[pypi-dependencies]
+faim-ipa = ">=0.3.5,<0.4"
 
 [feature.docs.dependencies]
 mkdocs-material = ">=9.5.18,<9.6"
@@ -54,9 +72,19 @@ nbdev = ">=2.2.10,<2.3"
 [feature.nbdev.tasks]
 clean = "nbdev_clean --clear_all"
 
+[feature.cuda]
+platforms = ["linux-64"]
+system-requirements = { cuda = "11" }
+channels = ["conda-forge"]
+dependencies = { tensorflow-gpu="*"}
+
+[feature.n2v.pypi-dependencies]
+n2v = ">=0.3.2,<0.3.3"
+
 [environments]
 docs = ["docs"]
 dev = ["dev"]
 nextflow = ["nextflow"]
 jupyter = ["jupyter"]
 nbdev = {features=["nbdev"], no-default-feature = true}
+n2v = ["n2v", "cuda"]

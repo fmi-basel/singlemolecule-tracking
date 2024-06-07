@@ -6,5 +6,3 @@ export PIXI_CACHE_DIR="$(pwd)/infrastructure/apps/pixi/.pixi_cache"
 export TMPDIR="$(pwd)/infrastructure/.tmp_$USER"
 mkdir -p "$TMPDIR"
 
-# Ensure that the latest documentation is built.
-pixi run build_docs
