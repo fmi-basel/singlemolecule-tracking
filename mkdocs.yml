@@ -11,6 +11,10 @@ nav:
     - 'Tutorials': tutorial/tutorials.md
   - 'How-to Guide':
     - 'Guides': how_to/guides.md
+    - 'N2V':
+        - 'Generate Training Data': how_to/N2V_generate_train_data.md
+        - 'Train': how_to/N2V_train_model.md
+        - 'Predict': how_to/N2V_predict.md
   - Explanation:
     - 'Explanations': explanation/explanations.md
   - References:
