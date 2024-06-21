@@ -14,11 +14,11 @@ linux="4.18"
 [tasks]
 source_status = { cmd = 'echo "Found $(git status --porcelain ipa | wc -l) untracked changes in ./ipa." && exit $(git status --porcelain ipa | wc -l)'}
 log_commit = {cmd = 'echo "[$(date -Iseconds)][Executing] $TASK [Git-Commit] $(git rev-parse --verify HEAD)" >> $WD/githash.log', env = {TASK = ""}}
-build_config = { cmd = "mkdir -p $WD ; TASK=BUILD_CONFIG pixi run log_commit ; cd $WD ; pixi run python ../../ipa/n2v/build_config.py", env = { WD = "runs/example"}}#, depends_on=["source_status"]}
-generate_data = { cmd = "TASK=GENERATE_DATA pixi run log_commit ; cd $WD ; pixi run -e n2v python ../../ipa/n2v/generate_train_data_2D.py", env = { WD = "runs/example"}}#, depends_on=["source_status"]}
-train = { cmd = "TASK=TRAIN pixi run log_commit ; cd $WD ; pixi run -e n2v python ../../ipa/n2v/train.py", env = { WD = "runs/example"}}#, depends_on=["source_status"]}
-predict = { cmd = "TASK=PREDICT pixi run log_commit ; cd $WD ; pixi run -e n2v python ../../ipa/n2v/predict.py", env={WD = "runs/example"}}#, depends_on=["source_status"]}
-submit_job = { cmd = "TASK=SUBMIT_JOB pixi run log_commit ; sbatch ipa/n2v/slurm-job_$JOB.sh $ACCOUNT $WD", env = { JOB = "", ACCOUNT = "", WD = ""}}#, depends_on=["source_status"]}
+build_config = { cmd = "mkdir -p $WD ; TASK=BUILD_CONFIG pixi run log_commit ; cd $WD ; pixi run python ../../ipa/n2v/build_config.py", env = { WD = "runs/example"}, depends_on=["source_status"]}
+generate_data = { cmd = "TASK=GENERATE_DATA pixi run log_commit ; cd $WD ; pixi run -e n2v python ../../ipa/n2v/generate_train_data_2D.py", env = { WD = "runs/example"}, depends_on=["source_status"]}
+train = { cmd = "TASK=TRAIN pixi run log_commit ; cd $WD ; pixi run -e n2v python ../../ipa/n2v/train.py", env = { WD = "runs/example"}, depends_on=["source_status"]}
+predict = { cmd = "TASK=PREDICT pixi run log_commit ; cd $WD ; pixi run -e n2v python ../../ipa/n2v/predict.py", env={WD = "runs/example"}, depends_on=["source_status"]}
+submit_job = { cmd = "TASK=SUBMIT_JOB pixi run log_commit ; sbatch ipa/n2v/slurm-job_$JOB.sh $ACCOUNT $WD", env = { JOB = "", ACCOUNT = "", WD = ""}, depends_on=["source_status"]}
 
 [dependencies]
 python = ">=3.9,<3.13"
