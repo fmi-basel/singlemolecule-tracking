@@ -75,10 +75,10 @@ def generate_train_data_2D(
         augment=True,
     )
     val_output_file = join(config.output_dir, "x_val_2D.npy")
-    np.save(val_output_file, x_val_data[:, 0])
+    np.save(val_output_file, x_val_data)
     logger.info(f"Saved validation data to {val_output_file}.")
     train_output_file = join(config.output_dir, "x_train_2D.npy")
-    np.save(train_output_file, x_train_data[:, 0])
+    np.save(train_output_file, x_train_data)
     logger.info(f"Saved training data to {train_output_file}.")
 
     logger.info("Done.")
