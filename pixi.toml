@@ -24,6 +24,8 @@ submit_job = { cmd = "TASK=SUBMIT_JOB pixi run log_commit ; sbatch ipa/n2v/slurm
 python = ">=3.9,<3.13"
 tqdm = ">=4.66.2,<4.67"
 tifffile = ">=2024.5.10,<2024.6"
+imagecodecs = {version="*", channel="conda-forge"}
+libjpeg-turbo = {version="*", channel="conda-forge"}
 pyyaml = ">=6.0.1,<6.1"
 pydantic = ">=2.7.1,<3.0"
 scikit-image = ">=0.22.0,<0.23"
@@ -81,6 +83,33 @@ dependencies = { tensorflow-gpu="*"}
 [feature.n2v.pypi-dependencies]
 n2v = ">=0.3.2,<0.3.3"
 
+[feature.cellpose]
+channels = ["nvidia", "pytorch", "conda-forge"]
+
+[feature.cellpose.dependencies]
+python = "==3.11"
+numpy = "<2"
+scipy = ">=1.10.1,<1.11"
+natsort = ">=8.4.0,<8.5"
+numba = ">=0.58.1,<0.59"
+pyqt = ">=5.15.9,<5.16"
+
+[feature.cellpose.pypi-dependencies]
+cellpose = {version=">=3.0.10, <3.1", extras=["gui"]}
+
+[feature.pytorch]
+channels = ["pytorch", "conda-forge"]
+
+[feature.pytorch.dependencies]
+pytorch = {version=">=2.3.1,<2.4", channel="pytorch"}
+
+[feature.pytorch-gpu]
+channels = ["nvidia", "pytorch", "conda-forge"]
+system-requirements = { cuda = "11" }
+
+[feature.pytorch-gpu.dependencies]
+pytorch-cuda = {version="11.8.*", channel="pytorch"}
+
 [environments]
 docs = ["docs"]
 dev = ["dev"]
@@ -88,3 +117,5 @@ nextflow = ["nextflow"]
 jupyter = ["jupyter"]
 nbdev = {features=["nbdev"], no-default-feature = true}
 n2v = ["n2v", "cuda"]
+cellpose = ["cellpose", "pytorch"]
+cellpose-gpu = ["cellpose", "pytorch", "pytorch-gpu"]
