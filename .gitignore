@@ -149,5 +149,6 @@ results/**
 # TMP
 infrastructure/.tmp_*/**
 
-# Ignore the runs folder
+# Ignore the runs and output folders
 runs/
+slurm_output/
