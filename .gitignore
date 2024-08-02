@@ -148,3 +148,6 @@ results/**
 
 # TMP
 infrastructure/.tmp_*/**
+
+# Ignore the runs folder
+runs/
