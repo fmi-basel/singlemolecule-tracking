@@ -130,3 +130,6 @@ dmypy.json
 
 # infrastructure/apps
 infrastructure/apps/micromamba/
+
+# Mac
+.DS_Store

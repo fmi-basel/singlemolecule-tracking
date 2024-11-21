@@ -75,10 +75,9 @@ def subpixel_localization_2d(spot_img, spacing):
             spot_img.ravel(),
             p0=init_params,
             bounds=bounds
-    	)
+        )
     except ValueError as e:
         print("Skipping spot. Could not compute sub-pixel localization.")
-    finally:
         popt = init_params
 
     return popt

@@ -146,8 +146,12 @@ def detect_spots_in_frame(denoised_slice: ArrayLike, raw_slice: ArrayLike, mask:
         frame=frame,
         logger=logger,
     )
+    try:
+    	spots_for_frame_df['mean_spot_intensity'] = spots_for_frame_df.apply(get_raw_spot_intensity_computer(raw_slice), axis=1)
+    
+    except ValueError as e:
+        print("No spots in frame, skipping frame.")
 
-    spots_for_frame_df['mean_spot_intensity'] = spots_for_frame_df.apply(get_raw_spot_intensity_computer(raw_slice), axis=1)
     return spots_for_frame_df
 
 
