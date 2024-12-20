@@ -33,7 +33,7 @@ def load_data(img_file: str, mask_file: str):
         img_file: Path to image file.
         mask_file: Path to mask file.
 
-    Retruns:
+    Returns:
         denoised_img: Loaded denoised image data
         raw_img: Loaded raw image data
         mask: Cell instance masks
@@ -43,22 +43,23 @@ def load_data(img_file: str, mask_file: str):
 
     denoised_img = img[:, 0]
     raw_img = img[:, 1]
+    img_actin = img[:, 2]
+    img_tubulin = img[:, 3]
 
-    return denoised_img, raw_img, mask
+    return denoised_img, raw_img, img_actin, img_tubulin, mask
 
 
 def normalize_minmse(x, target):
     """Affine rescaling of x, such that the mean squared error to target is minimal."""
-    cov = np.cov(x.flatten(),target.flatten())
-    alpha = cov[0,1] / (cov[0,0]+1e-10)
-    beta = target.mean() - alpha*x.mean()
-    return alpha*x + beta
+    cov = np.cov(x.flatten(), target.flatten())
+    alpha = cov[0, 1] / (cov[0, 0] + 1e-10)
+    beta = target.mean() - alpha * x.mean()
+    return alpha * x + beta
 
 
 def detect_spots(denoised_slice: ArrayLike, mask: ArrayLike, wavelength: int, NA: float, spacing: tuple[float, float], k: float):
     """Spot detection with LoG filter and h-maxima and std as threshold."""
-
-    sigma = wavelength/ ( 2 * NA ) / np.sqrt(2) / (spacing[1] * 1000)
+    sigma = wavelength / ( 2 * NA ) / np.sqrt(2) / (spacing[1] * 1000)
     log_img = -gaussian_laplace(img_as_float32(denoised_slice), sigma=sigma) * sigma**2
     log_img = img_as_uint(
         np.clip(
@@ -110,19 +111,28 @@ def refine_spots(spots_per_roi: list, roi_labels: list, denoised_slice: ArrayLik
 
 def get_raw_spot_intensity_computer(
         raw_img: ArrayLike,
+        img_actin: ArrayLike,
+        img_tubulin: ArrayLike
 ):
     def raw_spot_intensity_computer(row):
         y, x = row[['y', 'x']]
         y, x = int(np.round(y)), int(np.round(x))
 
-        sum_intensity = np.mean(raw_img[y-1:y+1, x-1:x+1])
+        # Calculate mean intensity of the 3x3 pixel region around the spot
+        region_raw = raw_img[y-1:y+2, x-1:x+2]
+        region_actin = img_actin[y-1:y+2, x-1:x+2]
+        region_tubulin = img_tubulin[y-1:y+2, x-1:x+2]
 
-        return sum_intensity / 9.
+        mean_intensity_raw = np.mean(region_raw)
+        mean_intensity_actin = np.mean(region_actin)
+        mean_intensity_tubulin = np.mean(region_tubulin)
+
+        return mean_intensity_raw, mean_intensity_actin, mean_intensity_tubulin
     
     return raw_spot_intensity_computer
 
 
-def detect_spots_in_frame(denoised_slice: ArrayLike, raw_slice: ArrayLike, mask: ArrayLike, frame: int,
+def detect_spots_in_frame(denoised_slice: ArrayLike, raw_slice: ArrayLike, img_actin: ArrayLike, img_tubulin: ArrayLike, mask: ArrayLike, frame: int,
                           NA: float, wavelength: int, spacing: tuple[float, float], k: float):
     logger.info(f"Processing frame #{frame}.")
     spots = detect_spots(
@@ -146,9 +156,11 @@ def detect_spots_in_frame(denoised_slice: ArrayLike, raw_slice: ArrayLike, mask:
         frame=frame,
         logger=logger,
     )
-    try:
-    	spots_for_frame_df['mean_spot_intensity'] = spots_for_frame_df.apply(get_raw_spot_intensity_computer(raw_slice), axis=1)
     
+    try:
+        spots_for_frame_df[['mean_spot_intensity_raw', 'mean_spot_intensity_actin', 'mean_spot_intensity_tubulin']] = spots_for_frame_df.apply(
+            get_raw_spot_intensity_computer(raw_slice, img_actin, img_tubulin), axis=1, result_type="expand"
+        )
     except ValueError as e:
         print("No spots in frame, skipping frame.")
 
@@ -156,9 +168,9 @@ def detect_spots_in_frame(denoised_slice: ArrayLike, raw_slice: ArrayLike, mask:
 
 
 def detect_spots_in_2DTime(img_file: str, mask_file: str,
-                           NA: float, wavelength: int, spacing: tuple[float, float], k:float):
+                           NA: float, wavelength: int, spacing: tuple[float, float], k: float):
 
-    denoised_img, raw_img, mask = load_data(
+    denoised_img, raw_img, img_actin, img_tubulin, mask = load_data(
         img_file=img_file,
         mask_file=mask_file,
     )
@@ -173,6 +185,8 @@ def detect_spots_in_2DTime(img_file: str, mask_file: str,
                 kwds={
                     "denoised_slice": denoised_img[frame],
                     "raw_slice": raw_img[frame],
+                    "img_actin": img_actin[frame],
+                    "img_tubulin": img_tubulin[frame],
                     "mask": mask,
                     "frame": frame,
                     "NA": NA,
@@ -192,7 +206,6 @@ def detect_spots_in_2DTime(img_file: str, mask_file: str,
         dfs.append(future.get())
 
     return pd.concat(dfs)
-
 
 
 if __name__ == "__main__":
