@@ -10,3 +10,7 @@ dependencies:
   - pandas
   - seaborn-base
   - jupyter
+  - tqdm
+  - pip
+  - pip:
+    - questionary

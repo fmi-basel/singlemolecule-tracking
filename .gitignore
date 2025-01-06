@@ -117,6 +117,9 @@ venv.bak/
 # Rope project settings
 .ropeproject
 
+# pycharm
+.idea/
+
 # mkdocs documentation
 /site
 
@@ -128,5 +131,28 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-# infrastructure/apps
-infrastructure/apps/micromamba/
+# infrastructure
+infrastructure/apps/**/
+
+# pixi environments
+.pixi
+*.egg-info
+
+# Data directories
+processed_data/**
+!processed_data/README.md
+raw_data/**
+!raw_data/README.md
+results/**
+!results/README.md
+
+# TMP
+infrastructure/.tmp_*/**
+
+# Ignore the runs and output folders
+runs/
+slurm_output/
+
+# Ignore .DS_Store files everywhere
+.DS_Store
+**/.DS_Store

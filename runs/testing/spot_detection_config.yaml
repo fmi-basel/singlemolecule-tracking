@@ -1,0 +1,8 @@
+NA: 1.4
+img_file: ../../../../../../tungstenfs/scratch/gchao/bamfaile/Analysis/TUBB2B-KI/Batch20230223/D21/Denoised/
+mask_file: ../../../../../../tungstenfs/scratch/gchao/bamfaile/Analysis/TUBB2B-KI/Batch20230223/D21/ROIs/ROIs_as_mask_BIOP/
+output_dir: outputs
+spacing:
+- 0.65
+- 0.65
+wavelength: 562
