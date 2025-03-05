@@ -1,9 +1,0 @@
-NA: 1.4
-img_file: ../../../../../gchao/waldsimo/Spot-Detection/Re_FOXA2-SIX3_200240823/SIX3/SIX3_Signal
-k: 4.0
-mask_file: ../../../../../gchao/waldsimo/Spot-Detection/Re_FOXA2-SIX3_200240823/SIX3/Expanded_Masks
-output_dir: ../../../../../gchao/waldsimo/Spot-Detection/Re_FOXA2-SIX3_200240823/SIX3/Spot_detection_output
-spacing:
-- 0.114
-- 0.114
-wavelength: 652
