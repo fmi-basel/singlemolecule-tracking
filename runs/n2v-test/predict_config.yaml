@@ -1,8 +1,0 @@
-axes: TYX
-base_dir: ../../Data/gchao/n2v-testing
-input_dir: ../../../../tungstenfs/scratch/gchao/bamfaile/Analysis/TUBB2B-KI/Batch20230223_prelim/D55/TUBB2B-KI_D55_2%/Raw/00_500ms
-n2v_model_name: n2v-model
-output_dir: ../../Data/gchao/n2v-testing/denoised
-pattern: '.*.stk'
-weights: last
-xy_pixelsize_um: 0.134
