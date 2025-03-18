@@ -38,5 +38,5 @@ After manual creation of whole cell and nucleus masks, run task "organoid_mask_c
 
 # File renaming
 
-1. For spot detection the dual channel images and the cytoplams mask have to have matching names, with the exception of "_ROIs" at the end of the mask images. To achieve that use the notebook from task "File_renaming" to change either the merged images or the masks (mask are recommended).
+1. For spot detection the dual channel images and the cytoplams mask have to have matching names, with the exception of "_ROIs" at the end of the mask images. To achieve that use the notebook from task "file_renaming" to change either the merged images or the masks (mask are recommended).
 

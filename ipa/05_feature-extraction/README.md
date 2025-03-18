@@ -1,6 +1,6 @@
 # Calculating distance to nucleus
 
-1. To only calculate the distance to the nucleus of each spot, run task "calculate-distance-to-nucleus".
+1. To only calculate the distance to the nucleus of each spot, run task "calculate_distance-to-nucleus".
 
 # Creating cell compartment masks
 

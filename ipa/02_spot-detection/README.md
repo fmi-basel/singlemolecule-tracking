@@ -1,3 +1,7 @@
+# Spot detection description (from methods section)
+
+# Data availability
+
 # Spot detection without cytoskeletal stain intensities
 
 1. For spot detection in organoid images run task "spot_detection".

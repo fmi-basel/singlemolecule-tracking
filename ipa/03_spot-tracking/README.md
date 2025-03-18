@@ -16,6 +16,8 @@ Internally defined parameters are adaptive_stop and adaptive_step:
 They deal with cases when the subnetwork of particles is too large and they cannot be unambiguously assigned to one track, it reduces the network in a stepwise manner until it is able to resolve the network or the adaptive_stop threshhold is met. For reference see:
 http://soft-matter.github.io/trackpy/v0.6.1/tutorial/adaptive-search.html
 
+# Data availability
+
 # Run tracking
 
 1. Run tracking with task task "tracking".
