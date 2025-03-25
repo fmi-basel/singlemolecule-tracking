@@ -33,7 +33,9 @@ def configure_generate_train_data(existing_config: InputData = None) -> InputDat
     xy_pixelsize_um = float(
         questionary.text(
             "XY pixelsize (um):",
-            default=str(existing_config.xy_pixelsize_um) if existing_config else "0.114",
+            default=(
+                str(existing_config.xy_pixelsize_um) if existing_config else "0.114"
+            ),
             validate=lambda x: x.replace(".", "").isdigit(),
         ).ask()
     )
@@ -41,16 +43,22 @@ def configure_generate_train_data(existing_config: InputData = None) -> InputDat
         int(x)
         for x in questionary.text(
             "Patch shape:",
-            default=", ".join(map(str, existing_config.patch_shape))
-            if existing_config
-            else "128, 128",
+            default=(
+                ", ".join(map(str, existing_config.patch_shape))
+                if existing_config
+                else "128, 128"
+            ),
             validate=lambda x: x.replace(" ", "").replace(",", "").isdigit(),
-        ).ask().split(",")
+        )
+        .ask()
+        .split(",")
     )
     num_patches_per_img = int(
         questionary.text(
             "Number of patches per image:",
-            default=str(existing_config.num_patches_per_img) if existing_config else "8",
+            default=(
+                str(existing_config.num_patches_per_img) if existing_config else "8"
+            ),
             validate=lambda x: x.isdigit(),
         ).ask()
     )
@@ -108,11 +116,15 @@ def configure_train_model(existing_config: TrainModel) -> TrainModel:
         int(x)
         for x in questionary.text(
             "Patch shape:",
-            default=", ".join(map(str, existing_config.patch_shape))
-            if existing_config
-            else "96, 96",
+            default=(
+                ", ".join(map(str, existing_config.patch_shape))
+                if existing_config
+                else "96, 96"
+            ),
             validate=lambda x: x.replace(" ", "").replace(",", "").isdigit(),
-        ).ask().split(",")
+        )
+        .ask()
+        .split(",")
     )
 
     return TrainModel(
@@ -147,7 +159,9 @@ def configure_predict(existing_config: N2VPredict) -> N2VPredict:
     xy_pixelsize_um = float(
         questionary.text(
             "XY pixelsize (um):",
-            default=str(existing_config.xy_pixelsize_um) if existing_config else "0.114",
+            default=(
+                str(existing_config.xy_pixelsize_um) if existing_config else "0.114"
+            ),
             validate=lambda x: x.replace(".", "").isdigit(),
         ).ask()
     )

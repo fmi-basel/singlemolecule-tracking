@@ -1,4 +1,4 @@
-# Tracking with Trackpy 
+# Tracking with Trackpy
 
 For reference see: http://soft-matter.github.io/trackpy/v0.6.1/
 

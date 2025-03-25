@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "Add a short description here"
 authors = ["Tim-Oliver Buchholz <tim-oliver.buchholz@fmi.ch>"]
 channels = ["conda-forge", "bioconda"]
-platforms = ["linux-64", "osx-64"]
+platforms = ["linux-64", "osx-64", "osx-arm64"]
 
 [system-requirements]
 # Minimum linux version for this project to work.
@@ -128,11 +128,11 @@ system-requirements = { cuda = "11" }
 pytorch-cuda = {version="11.8.*", channel="pytorch"}
 
 [environments]
-docs = ["docs"]
-dev = ["dev"]
-nextflow = ["nextflow"]
-jupyter = ["jupyter"]
+docs = { features=["docs"], solve-group="default" }
+dev = { features=["dev"], solve-group="default" }
+nextflow = { features=["nextflow"], solve-group="default" }
+jupyter = { features=["jupyter"], solve-group="default" }
+n2v = {features=["n2v", "cuda"], solve-group="default" }
 nbdev = {features=["nbdev"], no-default-feature = true}
-n2v = {features=["n2v", "cuda"], no-default-feature=true}
-cellpose = {features=["cellpose", "pytorch"], no-default-feature = true} 
+cellpose = {features=["cellpose", "pytorch"], no-default-feature = true}
 cellpose-gpu = {features=["cellpose", "pytorch", "pytorch-gpu"], no-default-feature = true}

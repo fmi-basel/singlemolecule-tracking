@@ -5,6 +5,7 @@ from n2v.models import N2V, N2VConfig
 
 from config import TrainModel
 
+
 def train_model(
     config: TrainModel,
 ):
@@ -43,6 +44,7 @@ def train_model(
     model.train(x, x_val)
 
     logger.info("Done.")
+
 
 if __name__ == "__main__":
     with open("train_model_config.yaml", "r") as f:

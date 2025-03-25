@@ -2,30 +2,28 @@ import os
 import questionary
 import yaml
 
+
 def build_config():
     cwd = os.getcwd()
 
     spots_file = questionary.path("Path spots files:").ask()
     output_dir = questionary.path("Path to output directory:").ask()
-    link_distance = float(questionary.text(
-        "link_distance:",
-        validate=lambda v: v.replace(".", "").isdigit()
-    ).ask())
-    gaps = int(questionary.text(
-        "gaps:",
-        validate=lambda v: v.isdigit()
-    ).ask())
-    track_length = int(questionary.text(
-        "track_length:",
-        validate=lambda v: v.isdigit()
-    ).ask())
-    
+    link_distance = float(
+        questionary.text(
+            "link_distance:", validate=lambda v: v.replace(".", "").isdigit()
+        ).ask()
+    )
+    gaps = int(questionary.text("gaps:", validate=lambda v: v.isdigit()).ask())
+    track_length = int(
+        questionary.text("track_length:", validate=lambda v: v.isdigit()).ask()
+    )
+
     config = {
         "spots_file": os.path.relpath(spots_file, cwd),
         "output_dir": os.path.relpath(output_dir, cwd),
         "link_distance": link_distance,
         "gaps": gaps,
-        "track_length": track_length
+        "track_length": track_length,
     }
 
     os.makedirs(output_dir, exist_ok=False)

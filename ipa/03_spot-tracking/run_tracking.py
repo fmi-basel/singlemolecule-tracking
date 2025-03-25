@@ -8,14 +8,13 @@ import numpy as np
 import pandas as pd
 import trackpy as tp
 import yaml
-from numpy._typing import ArrayLike
 from tqdm import tqdm
 
-logger = logging.Logger('Tracking')
-now = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+logger = logging.Logger("Tracking")
+now = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 handler = logging.FileHandler(f"{now}-spot-tracking.log")
 handler.setLevel(logging.INFO)
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 handler.setFormatter(formatter)
 logger.addHandler(handler)
 
@@ -31,15 +30,10 @@ def split_table_by_roi_id(spots: pd.DataFrame) -> list[pd.DataFrame]:
     Returns:
         spots_per_ROI: List of DataFrames containing spots per ROI
     """
-    return [j for i,j in spots.groupby("roi_id", sort = False, as_index = False)]
+    return [j for i, j in spots.groupby("roi_id", sort=False, as_index=False)]
 
 
-def linking(
-    spots_file: str,
-    link_distance: float,
-    gaps: int,
-    track_length: int
-):
+def linking(spots_file: str, link_distance: float, gaps: int, track_length: int):
     """
     Links spots in dataframes with trackpy's basic linking function.
 
@@ -54,15 +48,16 @@ def linking(
     """
     spots = pd.read_csv(spots_file)
     spots_per_roi = split_table_by_roi_id(spots)
-   
+
     tracks_per_roi = []
 
     for df in spots_per_roi:
-        df = tp.link(df, link_distance, memory=gaps,
-                     adaptive_stop=2, adaptive_step=0.95)
+        df = tp.link(
+            df, link_distance, memory=gaps, adaptive_stop=2, adaptive_step=0.95
+        )
         df = tp.filter_stubs(df, track_length)
         tracks_per_roi.append(df)
-    
+
     return pd.concat(tracks_per_roi)
 
 
@@ -85,9 +80,9 @@ def add_track_id_column(tracks: pd.DataFrame) -> pd.DataFrame:
     Returns:
         tracks: DataFrame containing tracks with track_id column
     """
-    tracks['track_id'] = tracks.apply(create_track_id, axis=1)
-    tracks.index._name = 'index'
-    tracks.sort_values(['track_id', 'frame'])
+    tracks["track_id"] = tracks.apply(create_track_id, axis=1)
+    tracks.index._name = "index"
+    tracks.sort_values(["track_id", "frame"])
 
     return tracks
 
@@ -102,9 +97,11 @@ def add_unique_id_column(tracks: pd.DataFrame) -> pd.DataFrame:
     Returns:
         tracks: DataFrame containing tracks with unique_id column
     """
-    tracks['unique_id'] = tracks['track_id']
-    track_ids = tracks['unique_id'].unique()
-    tracks['unique_id'] = tracks['unique_id'].replace(to_replace=track_ids, value=np.random.permutation(len(track_ids)))
+    tracks["unique_id"] = tracks["track_id"]
+    track_ids = tracks["unique_id"].unique()
+    tracks["unique_id"] = tracks["unique_id"].replace(
+        to_replace=track_ids, value=np.random.permutation(len(track_ids))
+    )
 
     return tracks
 
@@ -112,21 +109,21 @@ def add_unique_id_column(tracks: pd.DataFrame) -> pd.DataFrame:
 if __name__ == "__main__":
     with open("tracking_config.yaml", "r") as f:
         config = yaml.safe_load(f)
-    
+
     logger.info(f"Running tracking with config: {config}")
     tp.ignore_logging()
     tp.logger = logger
 
-    spots_files = glob(join(config['spots_file'], '*.csv'))
+    spots_files = glob(join(config["spots_file"], "*.csv"))
 
     for spots_file in tqdm(spots_files):
         logger.info(f"Processing file: {spots_file}")
 
         tracks_per_img = linking(
             spots_file=spots_file,
-            link_distance=config['link_distance'],
-            gaps=config['gaps'],
-            track_length=config['track_length']
+            link_distance=config["link_distance"],
+            gaps=config["gaps"],
+            track_length=config["track_length"],
         )
 
         tracks_per_img = add_track_id_column(tracks_per_img)
@@ -134,6 +131,8 @@ if __name__ == "__main__":
         tracks_per_img = add_unique_id_column(tracks_per_img)
 
         name, _ = os.path.splitext(os.path.basename(spots_file))
-        tracks_per_img.to_csv(join(config['output_dir'], f"{name}_tracks.csv"), index=False)
+        tracks_per_img.to_csv(
+            join(config["output_dir"], f"{name}_tracks.csv"), index=False
+        )
 
     logger.info("Done!")

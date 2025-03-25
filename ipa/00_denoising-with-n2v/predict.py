@@ -9,14 +9,12 @@ from tifffile import imread, imwrite
 from config import N2VPredict
 from generate_train_data_2D import list_images, move_axes_to_TZYXC
 
+
 def main(config: N2VPredict):
     logger = create_logger("n2v-predict")
     logger.info(f"config: {config.dict()}")
 
-    images = list_images(
-        input_dir=config.input_dir,
-        pattern=config.pattern
-    )
+    images = list_images(input_dir=config.input_dir, pattern=config.pattern)
 
     logger.info(f"Found {len(images)} images.")
 
@@ -82,6 +80,7 @@ def main(config: N2VPredict):
         )
 
     logger.info("Done.")
+
 
 def move_axes_from_TZYXC(data, axes: str):
     source, destination = (), ()

@@ -6,6 +6,6 @@ To install micromamba locally run the corresponding install script:
 [README.md](../../README.md)
 
 # Install BIOP update site
-To install BIOP update site in Fiji, go to `Help > Update... > Manage Update Sites` 
+To install BIOP update site in Fiji, go to `Help > Update... > Manage Update Sites`
 Tick PTBIOP `> Close`
 Restart ImageJ

@@ -28,9 +28,9 @@ def generate_train_data_2D(
 
     logger.info(f"Found {len(img_files)} images.")
 
-    assert len(img_files) >= 2, (
-        "Require at least two images to generate train and validation data."
-    )
+    assert (
+        len(img_files) >= 2
+    ), "Require at least two images to generate train and validation data."
 
     img_files_shuffled = copy(img_files)
     random.shuffle(img_files_shuffled)
@@ -93,9 +93,7 @@ def list_images(
     for entry in os.scandir(input_dir):
         if entry.is_file():
             if pattern_re.fullmatch(entry.name):
-                images.append(
-                    entry.path
-                )
+                images.append(entry.path)
 
     return images
 
@@ -110,6 +108,7 @@ def move_axes_to_TZYXC(data, axes: str):
             i += 1
 
     return np.moveaxis(data, source, destination)
+
 
 if __name__ == "__main__":
 

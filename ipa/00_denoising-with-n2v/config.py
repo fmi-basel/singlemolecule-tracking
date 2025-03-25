@@ -9,7 +9,7 @@ class InputData(BaseModel):
     output_dir: pathlib.Path
     pattern: str = "*.tif"
     axes: str = "ZYX"
-    xy_pixelsize_um: float =  0.114
+    xy_pixelsize_um: float = 0.114
     patch_shape: list[int] = [128, 128]
     num_patches_per_img: int = 8
 
