@@ -19,9 +19,60 @@ generate_data = { cmd = "TASK=GENERATE_DATA pixi run log_commit ; cd $WD ; pixi 
 train = { cmd = "TASK=TRAIN pixi run log_commit ; cd $WD ; pixi run -e n2v python $PIXI_PROJECT_ROOT/ipa/00_denoising-with-n2v/train.py", env = { WD = "runs/example"}, depends-on=["source_status"]}
 predict = { cmd = "TASK=PREDICT pixi run log_commit ; cd $WD ; pixi run -e n2v python $PIXI_PROJECT_ROOT/ipa/00_denoising-with-n2v/predict.py", env={WD = "runs/example"}, depends-on=["source_status"]}
 submit_job = { cmd = "TASK=SUBMIT_JOB pixi run log_commit ; sbatch ipa/00_denoising-with-n2v/slurm-job_$JOB.sh $ACCOUNT $WD", env = { JOB = "", ACCOUNT = "", WD = ""}, depends-on=["source_status"]}
-spot_detection = { cmd = "python $PIXI_PROJECT_ROOT/ipa/02_spot-detection/run_spot_detection.py --config $CFG", env = {CFG =""} }
-spot_detection_cytoskeleton = { cmd = "python $PIXI_PROJECT_ROOT/ipa/02_spot-detection/run_spot_detection_with_cytoskeleton.py --config $CFG", env = {CFG =""} }
-tracking = { cmd = "python $PIXI_PROJECT_ROOT/ipa/03_spot-tracking/run_tracking.py --config $CFG", env = {CFG =""} }
+
+[tasks.spot_detection_config]
+cmd = """
+mkdir -p $WD ;
+TASK=spot_detection_config pixi run log_commit ;
+cd $WD ;
+python $PIXI_PROJECT_ROOT/ipa/02_spot-detection/build_config.py
+"""
+env = { WD="" }
+#depends-on=["source_status"]
+
+[tasks.spot_detection]
+cmd = """
+cd $WD ;
+python $PIXI_PROJECT_ROOT/ipa/02_spot-detection/run_spot_detection.py --config spot_detection_config.yaml
+"""
+env = { WD=""}
+depends-on = [ "spot_detection_config" ]
+
+[tasks.spot_detection_with_cytoskeleton_config]
+cmd = """
+mkdir -p $WD ;
+TASK=spot_detection_with_cytoskeleton_config pixi run log_commit ;
+cd $WD ;
+python $PIXI_PROJECT_ROOT/ipa/02_spot-detection/build_config_with_cytoskeleton.py
+"""
+env = { WD="" }
+#depends-on=["source_status"]
+
+[tasks.spot_detection_with_cytoskeleton]
+cmd = """
+cd $WD ;
+python $PIXI_PROJECT_ROOT/ipa/02_spot-detection/run_spot_detection_with_cytoskeleton.py --config spot_detection_config.yaml
+"""
+env = { WD=""}
+depends-on = [ "spot_detection_with_cytoskeleton_config" ]
+
+[tasks.tracking_config]
+cmd = """
+mkdir -p $WD ;
+TASK=tracking_config pixi run log_commit ;
+cd $WD ;
+python $PIXI_PROJECT_ROOT/ipa/03_spot-tracking/build_config.py
+"""
+env = { WD="" }
+#depends-on=["source_status"]
+
+[tasks.tracking]
+cmd = """
+cd $WD ;
+python $PIXI_PROJECT_ROOT/ipa/03_spot-tracking/run_tracking.py --config tracking_config.yaml
+"""
+env = { WD=""}
+depends-on = [ "tracking_config" ]
 
 [dependencies]
 python = ">=3.9,<3.10"
@@ -75,14 +126,70 @@ pyqt = "==5.15.7"
 
 [feature.jupyter.tasks]
 jupyter = "jupyter lab"
-organoid_mask_creation = "jupyter lab $PIXI_PROJECT_ROOT/ipa/01_mask-creation-preprocessing/Organoid_mask_creation.ipynb"
-iNeuron_zstack_processing = "jupyter lab $PIXI_PROJECT_ROOT/ipa/01_mask-creation-preprocessing/iNeuron_zstack_processing.ipynb"
-iNeuron_single_slices = "jupyter lab $PIXI_PROJECT_ROOT/ipa/01_mask-creation-preprocessing/iNeuron_single_slices.ipynb"
-merge_raw_denoised_image = "jupyter lab $PIXI_PROJECT_ROOT/ipa/01_mask-creation-preprocessing/Merge_raw_denoised_image.ipynb"
-file_renaming = "jupyter lab $PIXI_PROJECT_ROOT/ipa/01_mask-creation-preprocessing/File_renaming.ipynb"
-visualization = "jupyter lab $PIXI_PROJECT_ROOT/ipa/04_visualization/Spot-detection-tracking_visualization.ipynb"
-calculate_distance-to-nucleus = "jupyter lab $PIXI_PROJECT_ROOT/ipa/05_feature-extraction/Calculate_distance_to_nucleus.ipynb"
-cell_compartments = "jupyter lab $PIXI_PROJECT_ROOT/ipa/05_feature-extraction/Cell_compartments_nuc_dist.ipynb"
+
+[feature.jupyter.tasks.organoid_mask_creation]
+cmd = """
+cp $PIXI_PROJECT_ROOT/ipa/01_mask-creation-preprocessing/Organoid_mask_creation.ipynb $WD ;
+cd $WD ;
+'jupyter lab' Organoid_mask_creation.ipynb
+"""
+env = { WD=""}
+
+[feature.jupyter.tasks.iNeuron_zstack_processing]
+cmd = """
+cp $PIXI_PROJECT_ROOT/ipa/01_mask-creation-preprocessing/iNeuron_zstack_processing.ipynb $WD ;
+cd $WD ;
+'jupyter lab' /iNeuron_zstack_processing.ipynb
+"""
+env = { WD=""}
+
+[feature.jupyter.tasks.iNeuron_single_slices]
+cmd = """
+cp $PIXI_PROJECT_ROOT/ipa/01_mask-creation-preprocessing/iNeuron_single_slices.ipynb $WD ;
+cd $WD ;
+'jupyter lab' /iNeuron_single_slices.ipynb
+"""
+env = { WD=""}
+
+[feature.jupyter.tasks.merge_raw_denoised_image]
+cmd = """
+cp $PIXI_PROJECT_ROOT/ipa/01_mask-creation-preprocessing/Merge_raw_denoised_image.ipynb $WD ;
+cd $WD ;
+'jupyter lab' /Merge_raw_denoised_image.ipynb
+"""
+env = { WD=""}
+
+[feature.jupyter.file_renaming]
+cmd = """
+cp $PIXI_PROJECT_ROOT/ipa/01_mask-creation-preprocessing/File_renaming.ipynb $WD ;
+cd $WD ;
+'jupyter lab' /File_renaming.ipynb
+"""
+env = { WD=""}
+
+[feature.jupyter.visualization]
+cmd = """
+cp $PIXI_PROJECT_ROOT/ipa/04_visualization/Spot-detection-tracking_visualization.ipynb $WD ;
+cd $WD ;
+'jupyter lab' /Spot-detection-tracking_visualization.ipynb
+"""
+env = { WD=""}
+
+[feature.jupyter.calculate_distance-to-nucleus]
+cmd = """
+cp $PIXI_PROJECT_ROOT/ipa/05_feature-extraction/Calculate_distance_to_nucleus.ipynb $WD ;
+cd $WD ;
+'jupyter lab' /Calculate_distance_to_nucleus.ipynb
+"""
+env = { WD=""}
+
+[feature.jupyter.cell_compartments]
+cmd = """
+cp $PIXI_PROJECT_ROOT/ipa/05_feature-extraction/Cell_compartments_nuc_dist.ipynb $WD ;
+cd $WD ;
+'jupyter lab' /Cell_compartments_nuc_dist.ipynb
+"""
+env = { WD=""}
 
 [feature.nbdev.dependencies]
 nbdev = ">=2.2.10,<2.3"
