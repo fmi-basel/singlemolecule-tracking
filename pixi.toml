@@ -159,7 +159,7 @@ cd $WD ;
 """
 env = { WD=""}
 
-[feature.jupyter.file_renaming]
+[feature.jupyter.tasks.file_renaming]
 cmd = """
 cp $PIXI_PROJECT_ROOT/ipa/01_mask-creation-preprocessing/File_renaming.ipynb $WD ;
 cd $WD ;
@@ -167,7 +167,7 @@ cd $WD ;
 """
 env = { WD=""}
 
-[feature.jupyter.visualization]
+[feature.jupyter.tasks.visualization]
 cmd = """
 cp $PIXI_PROJECT_ROOT/ipa/04_visualization/Spot-detection-tracking_visualization.ipynb $WD ;
 cd $WD ;
@@ -175,7 +175,7 @@ cd $WD ;
 """
 env = { WD=""}
 
-[feature.jupyter.calculate_distance-to-nucleus]
+[feature.jupyter.tasks.calculate_distance-to-nucleus]
 cmd = """
 cp $PIXI_PROJECT_ROOT/ipa/05_feature-extraction/Calculate_distance_to_nucleus.ipynb $WD ;
 cd $WD ;
@@ -183,7 +183,7 @@ cd $WD ;
 """
 env = { WD=""}
 
-[feature.jupyter.cell_compartments]
+[feature.jupyter.tasks.cell_compartments]
 cmd = """
 cp $PIXI_PROJECT_ROOT/ipa/05_feature-extraction/Cell_compartments_nuc_dist.ipynb $WD ;
 cd $WD ;
