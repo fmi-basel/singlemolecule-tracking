@@ -131,7 +131,7 @@ jupyter = "jupyter lab"
 cmd = """
 cp $PIXI_PROJECT_ROOT/ipa/01_mask-creation-preprocessing/Organoid_mask_creation.ipynb $WD ;
 cd $WD ;
-'jupyter lab' Organoid_mask_creation.ipynb
+jupyter lab Organoid_mask_creation.ipynb
 """
 env = { WD=""}
 
@@ -139,7 +139,7 @@ env = { WD=""}
 cmd = """
 cp $PIXI_PROJECT_ROOT/ipa/01_mask-creation-preprocessing/iNeuron_zstack_processing.ipynb $WD ;
 cd $WD ;
-'jupyter lab' /iNeuron_zstack_processing.ipynb
+jupyter lab iNeuron_zstack_processing.ipynb
 """
 env = { WD=""}
 
@@ -147,7 +147,7 @@ env = { WD=""}
 cmd = """
 cp $PIXI_PROJECT_ROOT/ipa/01_mask-creation-preprocessing/iNeuron_single_slices.ipynb $WD ;
 cd $WD ;
-'jupyter lab' /iNeuron_single_slices.ipynb
+jupyter lab iNeuron_single_slices.ipynb
 """
 env = { WD=""}
 
@@ -155,7 +155,7 @@ env = { WD=""}
 cmd = """
 cp $PIXI_PROJECT_ROOT/ipa/01_mask-creation-preprocessing/Merge_raw_denoised_image.ipynb $WD ;
 cd $WD ;
-'jupyter lab' /Merge_raw_denoised_image.ipynb
+jupyter lab Merge_raw_denoised_image.ipynb
 """
 env = { WD=""}
 
@@ -163,7 +163,7 @@ env = { WD=""}
 cmd = """
 cp $PIXI_PROJECT_ROOT/ipa/01_mask-creation-preprocessing/File_renaming.ipynb $WD ;
 cd $WD ;
-'jupyter lab' /File_renaming.ipynb
+jupyter lab File_renaming.ipynb
 """
 env = { WD=""}
 
@@ -171,7 +171,7 @@ env = { WD=""}
 cmd = """
 cp $PIXI_PROJECT_ROOT/ipa/04_visualization/Spot-detection-tracking_visualization.ipynb $WD ;
 cd $WD ;
-'jupyter lab' /Spot-detection-tracking_visualization.ipynb
+jupyter lab Spot-detection-tracking_visualization.ipynb
 """
 env = { WD=""}
 
@@ -179,7 +179,7 @@ env = { WD=""}
 cmd = """
 cp $PIXI_PROJECT_ROOT/ipa/05_feature-extraction/Calculate_distance_to_nucleus.ipynb $WD ;
 cd $WD ;
-'jupyter lab' /Calculate_distance_to_nucleus.ipynb
+jupyter lab Calculate_distance_to_nucleus.ipynb
 """
 env = { WD=""}
 
@@ -187,7 +187,7 @@ env = { WD=""}
 cmd = """
 cp $PIXI_PROJECT_ROOT/ipa/05_feature-extraction/Cell_compartments_nuc_dist.ipynb $WD ;
 cd $WD ;
-'jupyter lab' /Cell_compartments_nuc_dist.ipynb
+jupyter lab Cell_compartments_nuc_dist.ipynb
 """
 env = { WD=""}
 
