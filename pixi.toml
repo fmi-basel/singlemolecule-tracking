@@ -151,6 +151,22 @@ jupyter lab iNeuron_single_slices.ipynb
 """
 env = { WD=""}
 
+[feature.jupyter.tasks.iNeuron_mask_creation]
+cmd = """
+cp $PIXI_PROJECT_ROOT/ipa/01_mask-creation-preprocessing/iNeuron_mask_creation.ipynb $WD ;
+cd $WD ;
+jupyter lab iNeuron_mask_creation.ipynb
+"""
+env = { WD=""}
+
+[feature.jupyter.tasks.iPSC_mask_creation]
+cmd = """
+cp $PIXI_PROJECT_ROOT/ipa/01_mask-creation-preprocessing/iPSC_mask_creation.ipynb $WD ;
+cd $WD ;
+jupyter lab iPSC_mask_creation.ipynb
+"""
+env = { WD=""}
+
 [feature.jupyter.tasks.merge_raw_denoised_image]
 cmd = """
 cp $PIXI_PROJECT_ROOT/ipa/01_mask-creation-preprocessing/Merge_raw_denoised_image.ipynb $WD ;

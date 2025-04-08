@@ -35,7 +35,7 @@ WD=runs/mask_creation/example pixi run iNeuron_zstack_processing
 
 ## Mask creation for iNeuron masks
 
-1. For whole cell masks run task "iNeuron_cell_segmentation"
+1. For whole cell masks run task "iNeuron_cell_segmentation".
 ```commandline
 WD=runs/mask_creation/example pixi run needs-be-added
 ```
@@ -45,3 +45,10 @@ WD=runs/mask_creation/example pixi run needs-be-added
 WD=runs/mask_creation/example pixi run iNeuron_mask_creation
 ```
 1. Final masks can be manually corrected within the same notebook.
+
+## Mask creation for iPSCs
+
+To segment cells and create masks for iPSC data run task "iPSC_mask_creation".
+```commandline
+WD=runs/mask_creation/example pixi run iPSC_mask_creation
+```
