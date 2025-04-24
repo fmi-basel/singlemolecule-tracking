@@ -23,7 +23,7 @@ WD=runs/spot_detection/example pixi run spot_detection
 
 For spot detection in iNeuron images, including extraction of cytoskeletal stains intensities, run task "spot_detection_cytoskeleton".
 ```commandline
-WD=runs/spot_detection/example pixi run spot_detection_cytoskeleton
+WD=runs/spot_detection/example pixi run spot_detection_with_cytoskeleton
 ```
 
 [Github](https://github.com/)
