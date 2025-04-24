@@ -260,7 +260,9 @@ def detect_spots_in_2DTime(
 
     dfs = []
     for future in futures:
-        dfs.append(future.get())
+        df = future.get()
+        if len(df) > 0:
+            dfs.append(df)
 
     return pd.concat(dfs)
 
