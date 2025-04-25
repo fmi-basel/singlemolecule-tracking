@@ -7,9 +7,7 @@ nav:
   - Home: index.md
   - Data: data.md
   - Installation: installation.md
-  - Tutorial:
-    - 'Tutorials': tutorial/tutorials.md
-  - 'How-to Guide':
+  - 'How-to Guides':
     - 'Guides': how_to/guides.md
     - 'N2V':
         - 'Generate Training Data': how_to/N2V_generate_train_data.md

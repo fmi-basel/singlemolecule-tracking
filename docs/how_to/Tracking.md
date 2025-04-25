@@ -17,7 +17,7 @@ The parameters have to be tested empirically and depend on the dataset. For the 
 
 ## Run tracking
 
-Run tracking with task task "tracking".
+Run tracking with task task "tracking". Output folder needs to be created while building the config file.
 ```commandline
 WD=runs/tracking/example pixi run tracking
 ```

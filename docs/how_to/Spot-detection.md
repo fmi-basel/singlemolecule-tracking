@@ -14,14 +14,14 @@ For input requirements refer to the [spot_detection_script] (). k has to be empi
 
 ## Spot detection without cytoskeletal stain intensities
 
-For spot detection in organoid images run task "spot_detection".
+For spot detection in organoid images run task "spot_detection". Output folder needs to be created while building the config file.
 ```commandline
 WD=runs/spot_detection/example pixi run spot_detection
 ```
 
 ## Spot detection with cytoskeletal stain intensities
 
-For spot detection in iNeuron images, including extraction of cytoskeletal stains intensities, run task "spot_detection_cytoskeleton".
+For spot detection in iNeuron images, including extraction of cytoskeletal stains intensities, run task "spot_detection_cytoskeleton". Output folder needs to be created while building the config file.
 ```commandline
 WD=runs/spot_detection/example pixi run spot_detection_with_cytoskeleton
 ```

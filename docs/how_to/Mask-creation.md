@@ -10,7 +10,7 @@ This has to be done separately for whole cells and nuclei.
 1. Overlay ROIs
 1. Convert ROIs to label image with `BIOP > Image Analysis > ROIs > ROIs to label image`
 1. Change LUT to glasbey_inverted
-1. Save label image (keep image name + extension).
+1. Save label image (keep image name + extension "_ROIs").
 
 Criteria for cytoplasm ROI selection:
 
@@ -37,8 +37,9 @@ WD=runs/mask_creation/example pixi run iNeuron_zstack_processing
 
 1. For whole cell masks run task "iNeuron_cell_segmentation".
 ```commandline
-WD=runs/mask_creation/example pixi run needs-be-added
+WD=runs/mask_creation/example pixi run "iNeuron_cell_segmentation"
 ```
+For this task the folder structure and names needs to be exactly as in the [example_data] () and the command needs to be executed from the respective experiment subfolder. (Think about whether to change this to providing input and output folders directly.)
 1. For nuclei masks ilastik or any preferred segmentation tool can be used.
 1. Correct nuclei masks and create cytoplasm masks with task "iNeuron_mask_creation".
 ```commandline
@@ -46,7 +47,7 @@ WD=runs/mask_creation/example pixi run iNeuron_mask_creation
 ```
 1. Final masks can be manually corrected within the same notebook.
 
-## Mask creation for iPSCs
+## Mask creation for iPSC masks
 
 To segment cells and create masks for iPSC data run task "iPSC_mask_creation".
 ```commandline
