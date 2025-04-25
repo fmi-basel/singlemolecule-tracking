@@ -20,6 +20,24 @@ train = { cmd = "TASK=TRAIN pixi run log_commit ; cd $WD ; pixi run -e n2v pytho
 predict = { cmd = "TASK=PREDICT pixi run log_commit ; cd $WD ; pixi run -e n2v python $PIXI_PROJECT_ROOT/ipa/00_denoising-with-n2v/predict.py", env={WD = "runs/example"}, depends-on=["source_status"]}
 submit_job = { cmd = "TASK=SUBMIT_JOB pixi run log_commit ; sbatch ipa/00_denoising-with-n2v/slurm-job_$JOB.sh $ACCOUNT $WD", env = { JOB = "", ACCOUNT = "", WD = ""}, depends-on=["source_status"]}
 
+[tasks.iNeuron_cell_segmentation_config]
+cmd = """
+mkdir -p $WD ;
+TASK=iNeuron_cell_segmentation_config pixi run log_commit ;
+cd $WD ;
+python $PIXI_PROJECT_ROOT/ipa/01_mask-creation-preprocessing/build_config_cellpose.py
+"""
+env = { WD="" }
+#depends-on=["source_status"]
+
+[tasks.iNeuron_cell_segmentation]
+cmd = """
+cd $WD ;
+python $PIXI_PROJECT_ROOT/ipa/01_mask-creation-preprocessing/cellpose_predict.py --config cellpose_config.yaml
+"""
+env = { WD=""}
+depends-on = [ "iNeuron_cell_segmentation_config" ]
+
 [tasks.spot_detection_config]
 cmd = """
 mkdir -p $WD ;
@@ -92,6 +110,7 @@ seaborn-base = "==0.12.2"
 trackpy = "==0.6.1"
 numpy = "==1.24.3"
 matplotlib = "==3.7.1"
+cellpose = "*"
 
 [pypi-dependencies]
 faim-ipa = ">=0.3.5,<0.4"
@@ -217,7 +236,7 @@ clean = "nbdev_clean --clear_all"
 platforms = ["linux-64"]
 system-requirements = { cuda = "11" }
 channels = ["conda-forge"]
-dependencies = { tensorflow-gpu="*"}
+dependencies = { tensorflow="*"}
 
 [feature.n2v.pypi-dependencies]
 n2v = ">=0.3.2,<0.3.3"
