@@ -4,8 +4,8 @@
 
 [Facility for Advanced Imaging and Microscopy](https://www.fmi.ch/platforms/platform.html?plt=110)</br>
 Friedrich Miescher Institute for Biomedical Research</br>
-Maulbeerstrasse 66</br>
-CH - 4058 Basel
+Fabrikstrasse 24</br>
+CH - 4056 Basel
 
 
 ## License
