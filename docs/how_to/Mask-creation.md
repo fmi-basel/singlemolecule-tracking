@@ -53,3 +53,10 @@ To segment cells and create masks for iPSC data run task "iPSC_mask_creation".
 ```commandline
 WD=runs/mask_creation/example pixi run iPSC_mask_creation
 ```
+
+## Mask creation for vascular progenitor masks
+
+To segment cells and create masks for vascular progenitor data run task "vascular-progenitors_mask_creation".
+```commandline
+WD=runs/mask_creation/example pixi run vascular-progenitors_mask_creation
+```

@@ -186,6 +186,14 @@ jupyter lab iPSC_mask_creation.ipynb
 """
 env = { WD=""}
 
+[feature.jupyter.tasks.vascular-progenitors_mask_creation]
+cmd = """
+cp $PIXI_PROJECT_ROOT/ipa/01_mask-creation-preprocessing/vascular-progenitors_mask_creation.ipynb $WD ;
+cd $WD ;
+jupyter lab vascular-progenitors_mask_creation.ipynb
+"""
+env = { WD=""}
+
 [feature.jupyter.tasks.merge_raw_denoised_image]
 cmd = """
 cp $PIXI_PROJECT_ROOT/ipa/01_mask-creation-preprocessing/Merge_raw_denoised_image.ipynb $WD ;
@@ -223,6 +231,14 @@ cmd = """
 cp $PIXI_PROJECT_ROOT/ipa/05_feature-extraction/Cell_compartments_nuc_dist.ipynb $WD ;
 cd $WD ;
 jupyter lab Cell_compartments_nuc_dist.ipynb
+"""
+env = { WD=""}
+
+[feature.jupyter.tasks.nuc_dist_edge_dist]
+cmd = """
+cp $PIXI_PROJECT_ROOT/ipa/05_feature-extraction/Nuc_dist_edge_dist.ipynb $WD ;
+cd $WD ;
+jupyter lab Nuc_dist_edge_dist.ipynb
 """
 env = { WD=""}
 

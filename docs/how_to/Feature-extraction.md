@@ -10,3 +10,9 @@ Run task "cell_compartments" to calculate the distance to the nucleus and create
 ```commandline
 WD=runs/feature-extraction/example pixi run cell_compartments
 ```
+## Calculating distance to nucleus and cell edge
+
+Run task "nuc_dist_edge_dist" to calculate the distance to the nucleus and the edge of the cell.
+```commandline
+WD=runs/feature-extraction/example pixi run nuc_dist_edge_dist
+```
