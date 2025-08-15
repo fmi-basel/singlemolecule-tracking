@@ -5,9 +5,8 @@ site_name: Single Molecule Tracking
 copyright: Copyright &copy; 2025, Friedrich Miescher Institute for Biomedical Research
 nav:
   - Home: index.md
-  - Data: data.md
   - Installation: installation.md
-  - 'How-to Guides':
+  - How-to Guides:
     - 'Guides': how_to/guides.md
     - 'N2V':
         - 'Generate Training Data': how_to/N2V_generate_train_data.md
@@ -20,10 +19,6 @@ nav:
     - 'Tracking': how_to/Tracking.md
     - 'Visualization': how_to/Visualization.md
     - 'Feature extraction': how_to/Feature-extraction.md
-  - Explanation:
-    - 'Explanations': explanation/explanations.md
-  - References:
-    - References: references/references.md
   - Imprint: imprint.md
 theme:
   name: material
