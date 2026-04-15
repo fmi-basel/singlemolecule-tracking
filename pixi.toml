@@ -1,4 +1,4 @@
-[project]
+[workspace]
 name = "Single Molecule Tracking"
 version = "0.1.0"
 description = "Add a short description here"
@@ -216,7 +216,7 @@ cp $PIXI_PROJECT_ROOT/ipa/04_visualization/Spot-detection-tracking_visualization
 cd $WD ;
 jupyter lab Spot-detection-tracking_visualization.ipynb
 """
-env = { WD=""}
+#env = { WD=""}
 
 [feature.jupyter.tasks.calculate_distance-to-nucleus]
 cmd = """

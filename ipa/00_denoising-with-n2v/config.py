@@ -1,7 +1,7 @@
 import pathlib
 
 from faim_ipa.utils import resolve_with_git_root, make_relative_to_git_root
-from pydantic import BaseModel, field_serializer
+from pydantic import BaseModel
 
 
 class InputData(BaseModel):
@@ -13,9 +13,10 @@ class InputData(BaseModel):
     patch_shape: list[int] = [128, 128]
     num_patches_per_img: int = 8
 
-    @field_serializer("input_dir", "output_dir")
-    def path_to_str(path: pathlib.Path):
-        return str(path)
+    class Config:
+        json_encoders = {
+            pathlib.Path: str
+        }
 
     def resolve_paths(self):
         if not self.input_dir.is_absolute():
@@ -42,9 +43,10 @@ class TrainModel(BaseModel):
     unet_depth: int = 2
     patch_shape: list[int] = [96, 96]
 
-    @field_serializer("train_data", "val_data", "output_dir")
-    def path_to_str(path: pathlib.Path):
-        return str(path)
+    class Config:
+        json_encoders = {
+            pathlib.Path: str
+        }
 
     def resolve_paths(self):
         if not self.train_data.is_absolute():
@@ -77,9 +79,10 @@ class N2VPredict(BaseModel):
     n2v_model_name: str
     weights: str = "last"
 
-    @field_serializer("input_dir", "output_dir", "base_dir")
-    def path_to_str(path: pathlib.Path):
-        return str(path)
+    class Config:
+        json_encoders = {
+            pathlib.Path: str
+        }
 
     def resolve_paths(self):
         if not self.input_dir.is_absolute():
