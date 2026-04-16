@@ -3,7 +3,7 @@
 ## Build Config
 
 ```commandline
-WD=runs/example pixi run build_config
+WD=runs/denoising/config pixi run build_config
 ```
 Navigate with the arrow keys to the task for which you want to build a config file and select it with the space key.
 Input parameters to build the config file are:
@@ -23,11 +23,11 @@ Input parameters to build the config file are:
 
 ### Option 1: Run it locally
 ```commandline
-WD=runs/example pixi run generate_data
+WD=runs/denoising/generate pixi run generate_data
 ```
 
 ### Option 2: Run it on a cluster
 ```commandline
-WD=runs/example JOB=generate_data ACCOUNT=account-name pixi run submit_job
+WD=runs/denoising/generate JOB=generate_data ACCOUNT=account-name pixi run submit_job
 ```
 Replace `account-name` with your cluster account name.

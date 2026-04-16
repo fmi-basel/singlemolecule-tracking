@@ -23,27 +23,27 @@ Note: Any other drawing tool (e.g. Napari) can be used alternatively to create m
 
 After manual creation of whole cell and nucleus masks, run task "organoid_mask_creation" to substract nuclei from whole cells and create cytoplasm masks.
 ```commandline
-WD=runs/mask_creation/example pixi run organoid_mask_creation
+WD=runs/mask_creation pixi run organoid_mask_creation
 ```
 
 ## Create max. intensity projections from zstack for iNeuron mask creation
 
 Run task "iNeuron_zstack_processing".
 ```commandline
-WD=runs/mask_creation/example pixi run iNeuron_zstack_processing
+WD=runs/mask_creation pixi run iNeuron_zstack_processing
 ```
 
 ## Mask creation for iNeuron masks
 
 1. For whole cell masks run task "iNeuron_cell_segmentation".
 ```commandline
-WD=runs/mask_creation/example pixi run "iNeuron_cell_segmentation"
+WD=runs/mask_creation pixi run "iNeuron_cell_segmentation"
 ```
 For this task the folder structure and names needs to be exactly as in the [example_data] () and the command needs to be executed from the respective experiment subfolder. (Think about whether to change this to providing input and output folders directly.)
 1. For nuclei masks ilastik or any preferred segmentation tool can be used.
 1. Correct nuclei masks and create cytoplasm masks with task "iNeuron_mask_creation".
 ```commandline
-WD=runs/mask_creation/example pixi run iNeuron_mask_creation
+WD=runs/mask_creation pixi run iNeuron_mask_creation
 ```
 1. Final masks can be manually corrected within the same notebook.
 
@@ -51,12 +51,12 @@ WD=runs/mask_creation/example pixi run iNeuron_mask_creation
 
 To segment cells and create masks for iPSC data run task "iPSC_mask_creation".
 ```commandline
-WD=runs/mask_creation/example pixi run iPSC_mask_creation
+WD=runs/mask_creation pixi run iPSC_mask_creation
 ```
 
 ## Mask creation for vascular progenitor masks
 
 To segment cells and create masks for vascular progenitor data run task "vascular-progenitors_mask_creation".
 ```commandline
-WD=runs/mask_creation/example pixi run vascular-progenitors_mask_creation
+WD=runs/mask_creation pixi run vascular-progenitors_mask_creation
 ```

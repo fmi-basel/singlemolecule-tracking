@@ -152,7 +152,6 @@ cp $PIXI_PROJECT_ROOT/ipa/01_mask-creation-preprocessing/Organoid_mask_creation.
 cd $WD ;
 jupyter lab Organoid_mask_creation.ipynb
 """
-#env = { WD=""}
 
 [feature.jupyter.tasks.iNeuron_zstack_processing]
 cmd = """
@@ -160,7 +159,6 @@ cp $PIXI_PROJECT_ROOT/ipa/01_mask-creation-preprocessing/iNeuron_zstack_processi
 cd $WD ;
 jupyter lab iNeuron_zstack_processing.ipynb
 """
-#env = { WD=""}
 
 [feature.jupyter.tasks.iNeuron_single_slices]
 cmd = """
@@ -168,7 +166,6 @@ cp $PIXI_PROJECT_ROOT/ipa/01_mask-creation-preprocessing/iNeuron_single_slices.i
 cd $WD ;
 jupyter lab iNeuron_single_slices.ipynb
 """
-#env = { WD=""}
 
 [feature.jupyter.tasks.iNeuron_mask_creation]
 cmd = """
@@ -176,7 +173,6 @@ cp $PIXI_PROJECT_ROOT/ipa/01_mask-creation-preprocessing/iNeuron_mask_creation.i
 cd $WD ;
 jupyter lab iNeuron_mask_creation.ipynb
 """
-#env = { WD=""}
 
 [feature.jupyter.tasks.iPSC_mask_creation]
 cmd = """
@@ -184,7 +180,6 @@ cp $PIXI_PROJECT_ROOT/ipa/01_mask-creation-preprocessing/iPSC_mask_creation.ipyn
 cd $WD ;
 jupyter lab iPSC_mask_creation.ipynb
 """
-env = { WD=""}
 
 [feature.jupyter.tasks.vascular-progenitors_mask_creation]
 cmd = """
@@ -192,7 +187,6 @@ cp $PIXI_PROJECT_ROOT/ipa/01_mask-creation-preprocessing/vascular-progenitors_ma
 cd $WD ;
 jupyter lab vascular-progenitors_mask_creation.ipynb
 """
-#env = { WD=""}
 
 [feature.jupyter.tasks.merge_raw_denoised_image]
 cmd = """
@@ -200,7 +194,6 @@ cp $PIXI_PROJECT_ROOT/ipa/01_mask-creation-preprocessing/Merge_raw_denoised_imag
 cd $WD ;
 jupyter lab Merge_raw_denoised_image.ipynb
 """
-#env = { WD=""}
 
 [feature.jupyter.tasks.file_renaming]
 cmd = """
@@ -208,7 +201,6 @@ cp $PIXI_PROJECT_ROOT/ipa/01_mask-creation-preprocessing/File_renaming.ipynb $WD
 cd $WD ;
 jupyter lab File_renaming.ipynb
 """
-#env = { WD=""}
 
 [feature.jupyter.tasks.visualization]
 cmd = """
@@ -216,7 +208,6 @@ cp $PIXI_PROJECT_ROOT/ipa/04_visualization/Spot-detection-tracking_visualization
 cd $WD ;
 jupyter lab Spot-detection-tracking_visualization.ipynb
 """
-#env = { WD=""}
 
 [feature.jupyter.tasks.calculate_distance-to-nucleus]
 cmd = """
@@ -224,7 +215,6 @@ cp $PIXI_PROJECT_ROOT/ipa/05_feature-extraction/Calculate_distance_to_nucleus.ip
 cd $WD ;
 jupyter lab Calculate_distance_to_nucleus.ipynb
 """
-#env = { WD=""}
 
 [feature.jupyter.tasks.cell_compartments]
 cmd = """
@@ -232,7 +222,6 @@ cp $PIXI_PROJECT_ROOT/ipa/05_feature-extraction/Cell_compartments_nuc_dist.ipynb
 cd $WD ;
 jupyter lab Cell_compartments_nuc_dist.ipynb
 """
-#env = { WD=""}
 
 [feature.jupyter.tasks.nuc_dist_edge_dist]
 cmd = """
@@ -240,7 +229,6 @@ cp $PIXI_PROJECT_ROOT/ipa/05_feature-extraction/Nuc_dist_edge_dist.ipynb $WD ;
 cd $WD ;
 jupyter lab Nuc_dist_edge_dist.ipynb
 """
-#env = { WD=""}
 
 [feature.nbdev.dependencies]
 nbdev = ">=2.2.10,<2.3"
