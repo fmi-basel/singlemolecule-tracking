@@ -1,6 +1,7 @@
 import os
 import questionary
 import yaml
+import re
 
 
 def build_config():
@@ -21,7 +22,7 @@ def build_config():
         questionary.text(
             "Cell probability threshold (float):",
             default="0.0",
-            validate=lambda v: v.replace(".", "", 1).isdigit() and v.count(".") <= 1
+            validate=lambda v: re.fullmatch(r"-?\d+(\.\d+)?", v) is not None
         ).ask()
     )
 

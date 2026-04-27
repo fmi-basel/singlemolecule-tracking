@@ -27,7 +27,6 @@ TASK=iNeuron_cell_segmentation_config pixi run log_commit ;
 cd $WD ;
 python $PIXI_PROJECT_ROOT/ipa/01_mask-creation-preprocessing/build_config_cellpose.py
 """
-env = { WD="" }
 #depends-on=["source_status"]
 
 [tasks.iNeuron_cell_segmentation]
@@ -35,62 +34,48 @@ cmd = """
 cd $WD ;
 python $PIXI_PROJECT_ROOT/ipa/01_mask-creation-preprocessing/cellpose_predict.py --config cellpose_config.yaml
 """
-env = { WD=""}
 depends-on = [ "iNeuron_cell_segmentation_config" ]
 
 [tasks.spot_detection_config]
 cmd = """
 mkdir -p $WD ;
 TASK=spot_detection_config pixi run log_commit ;
-cd $WD ;
-python $PIXI_PROJECT_ROOT/ipa/02_spot-detection/build_config.py
+python $PIXI_PROJECT_ROOT/ipa/02_spot-detection/build_config.py --outdir $WD
 """
-env = { WD="" }
-#depends-on=["source_status"]
 
 [tasks.spot_detection]
 cmd = """
-cd $WD ;
-python $PIXI_PROJECT_ROOT/ipa/02_spot-detection/run_spot_detection.py --config spot_detection_config.yaml
+python $PIXI_PROJECT_ROOT/ipa/02_spot-detection/run_spot_detection.py --workdir $WD
 """
-env = { WD=""}
 depends-on = [ "spot_detection_config" ]
 
 [tasks.spot_detection_with_cytoskeleton_config]
 cmd = """
 mkdir -p $WD ;
 TASK=spot_detection_with_cytoskeleton_config pixi run log_commit ;
-cd $WD ;
-python $PIXI_PROJECT_ROOT/ipa/02_spot-detection/build_config_with_cytoskeleton.py
+python $PIXI_PROJECT_ROOT/ipa/02_spot-detection/build_config_with_cytoskeleton.py --outdir $WD
 """
-env = { WD="" }
-#depends-on=["source_status"]
 
 [tasks.spot_detection_with_cytoskeleton]
 cmd = """
-cd $WD ;
-python $PIXI_PROJECT_ROOT/ipa/02_spot-detection/run_spot_detection_with_cytoskeleton.py --config spot_detection_config.yaml
+python $PIXI_PROJECT_ROOT/ipa/02_spot-detection/run_spot_detection_with_cytoskeleton.py --workdir $WD
 """
-env = { WD=""}
 depends-on = [ "spot_detection_with_cytoskeleton_config" ]
 
 [tasks.tracking_config]
 cmd = """
 mkdir -p $WD ;
 TASK=tracking_config pixi run log_commit ;
-cd $WD ;
-python $PIXI_PROJECT_ROOT/ipa/03_spot-tracking/build_config.py
+python $PIXI_PROJECT_ROOT/ipa/03_spot-tracking/build_config.py --outdir $WD
 """
-env = { WD="" }
-#depends-on=["source_status"]
+#env = { WD="" }
 
 [tasks.tracking]
 cmd = """
-cd $WD ;
-python $PIXI_PROJECT_ROOT/ipa/03_spot-tracking/run_tracking.py --config tracking_config.yaml
+python $PIXI_PROJECT_ROOT/ipa/03_spot-tracking/run_tracking.py --workdir $WD
 """
-env = { WD=""}
-depends-on = [ "tracking_config" ]
+#env = { WD="" }
+depends-on = ["tracking_config"]
 
 [dependencies]
 python = ">=3.9,<3.10"
@@ -172,6 +157,13 @@ cmd = """
 cp $PIXI_PROJECT_ROOT/ipa/01_mask-creation-preprocessing/iNeuron_mask_creation.ipynb $WD ;
 cd $WD ;
 jupyter lab iNeuron_mask_creation.ipynb
+"""
+
+[feature.jupyter.tasks.iNeuron_mask_creation_with_nucleus]
+cmd = """
+cp $PIXI_PROJECT_ROOT/ipa/01_mask-creation-preprocessing/iNeuron_mask_creation_with_nucleus.ipynb $WD ;
+cd $WD ;
+jupyter lab iNeuron_mask_creation_with_nucleus.ipynb
 """
 
 [feature.jupyter.tasks.iPSC_mask_creation]

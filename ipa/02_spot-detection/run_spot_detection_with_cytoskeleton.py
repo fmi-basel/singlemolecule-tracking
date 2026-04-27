@@ -18,9 +18,20 @@ from datetime import datetime
 
 from os.path import join, basename
 
+import argparse
+from pathlib import Path
+
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--workdir", default=os.environ.get("WD", "."))
+args = parser.parse_args()
+
+workdir = Path(args.workdir).resolve()
+
+
 logger = logging.Logger("Spot Detection")
 now = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-handler = logging.FileHandler(f"{now}-spot-detection.log")
+handler = logging.FileHandler(workdir / f"{now}-spot-detection.log")
 handler.setLevel(logging.INFO)
 formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 handler.setFormatter(formatter)
@@ -28,21 +39,6 @@ logger.addHandler(handler)
 
 
 def load_data(img_file: str, mask_file: str, actin_file: str, tubulin_file: str):
-    """Load denoised, raw, mask, actin, and tubulin images.
-
-    Parameter:
-        img_file: Path to image file.
-        mask_file: Path to mask file.
-        actin_file: Path to actin image file.
-        tubulin_file: Path to tubulin image file.
-
-    Returns:
-        denoised_img: Loaded denoised image data
-        raw_img: Loaded raw image data
-        mask: Cell instance masks
-        actin: Actin channel image
-        tubulin: Tubulin channel image
-    """
     img = imread(img_file)
     mask = imread(mask_file)
     actin = imread(actin_file)
@@ -55,7 +51,6 @@ def load_data(img_file: str, mask_file: str, actin_file: str, tubulin_file: str)
 
 
 def normalize_minmse(x, target):
-    """Affine rescaling of x, such that the mean squared error to target is minimal."""
     cov = np.cov(x.flatten(), target.flatten())
     alpha = cov[0, 1] / (cov[0, 0] + 1e-10)
     beta = target.mean() - alpha * x.mean()
@@ -70,8 +65,6 @@ def detect_spots(
     spacing: tuple[float, float],
     k: float,
 ):
-    """Spot detection with LoG filter and h-maxima and std as threshold."""
-
     sigma = wavelength / (2 * NA) / np.sqrt(2) / (spacing[1] * 1000)
     log_img = -gaussian_laplace(img_as_float32(denoised_slice), sigma=sigma) * sigma**2
     log_img = img_as_uint(
@@ -169,16 +162,16 @@ def get_raw_spot_intensity_computer(
 
 
 def detect_spots_in_frame(
-    denoised_slice: ArrayLike,
-    raw_slice: ArrayLike,
-    mask: ArrayLike,
-    actin_slice: ArrayLike,
-    tubulin_slice: ArrayLike,
-    frame: int,
-    NA: float,
-    wavelength: int,
-    spacing: tuple[float, float],
-    k: float,
+    denoised_slice,
+    raw_slice,
+    mask,
+    actin_slice,
+    tubulin_slice,
+    frame,
+    NA,
+    wavelength,
+    spacing,
+    k,
 ):
     logger.info(f"Processing frame #{frame}.")
     spots = detect_spots(
@@ -190,10 +183,7 @@ def detect_spots_in_frame(
         k=k,
     )
 
-    spots_per_roi, roi_labels = assign_spots_to_ROIs(
-        spots=spots,
-        mask=mask,
-    )
+    spots_per_roi, roi_labels = assign_spots_to_ROIs(spots, mask)
 
     spots_for_frame_df = refine_spots(
         spots_per_roi=spots_per_roi,
@@ -202,6 +192,7 @@ def detect_spots_in_frame(
         frame=frame,
         logger=logger,
     )
+
     try:
         intensity_computer = get_raw_spot_intensity_computer(
             raw_slice, actin_slice, tubulin_slice
@@ -215,14 +206,14 @@ def detect_spots_in_frame(
 
 
 def detect_spots_in_2DTime(
-    img_file: str,
-    mask_file: str,
-    actin_file: str,
-    tubulin_file: str,
-    NA: float,
-    wavelength: int,
-    spacing: tuple[float, float],
-    k: float,
+    img_file,
+    mask_file,
+    actin_file,
+    tubulin_file,
+    NA,
+    wavelength,
+    spacing,
+    k,
 ):
 
     denoised_img, raw_img, mask, actin, tubulin = load_data(
@@ -268,7 +259,9 @@ def detect_spots_in_2DTime(
 
 
 if __name__ == "__main__":
-    with open("spot_detection_config.yaml", "r") as f:
+    config_path = workdir / "spot_detection_config.yaml"
+
+    with open(config_path, "r") as f:
         config = yaml.safe_load(f)
 
     logger.info(f"Running spot-detection with config: {config}")

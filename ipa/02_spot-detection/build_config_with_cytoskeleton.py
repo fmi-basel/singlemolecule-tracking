@@ -1,9 +1,11 @@
 import os
+import argparse
 import questionary
 import yaml
+from pathlib import Path
 
 
-def build_config():
+def build_config(outdir: Path):
     cwd = os.getcwd()
 
     img_file = questionary.path("Path raw/denoised image files:").ask()
@@ -42,9 +44,17 @@ def build_config():
 
     os.makedirs(output_dir, exist_ok=False)
 
-    with open(os.path.join(cwd, "spot_detection_config.yaml"), "w") as f:
+    config_path = outdir / "spot_detection_config.yaml"
+    with open(config_path, "w") as f:
         yaml.safe_dump(config, f)
 
 
 if __name__ == "__main__":
-    build_config()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--outdir", default=os.environ.get("WD", "."))
+    args = parser.parse_args()
+
+    outdir = Path(args.outdir).resolve()
+    outdir.mkdir(parents=True, exist_ok=True)
+
+    build_config(outdir)

@@ -17,10 +17,20 @@ import logging
 from datetime import datetime
 
 from os.path import join, basename
+import argparse
+from pathlib import Path
+
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--workdir", default=os.environ.get("WD", "."))
+args = parser.parse_args()
+
+workdir = Path(args.workdir).resolve()
+
 
 logger = logging.Logger("Spot Detection")
 now = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-handler = logging.FileHandler(f"{now}-spot-detection.log")
+handler = logging.FileHandler(workdir / f"{now}-spot-detection.log")
 handler.setLevel(logging.INFO)
 formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 handler.setFormatter(formatter)
@@ -28,17 +38,6 @@ logger.addHandler(handler)
 
 
 def load_data(img_file: str, mask_file: str):
-    """Load denoised and raw image.
-
-    Parameter:
-        img_file: Path to image file.
-        mask_file: Path to mask file.
-
-    Retruns:
-        denoised_img: Loaded denoised image data
-        raw_img: Loaded raw image data
-        mask: Cell instance masks
-    """
     img = imread(img_file)
     mask = imread(mask_file)
 
@@ -49,7 +48,6 @@ def load_data(img_file: str, mask_file: str):
 
 
 def normalize_minmse(x, target):
-    """Affine rescaling of x, such that the mean squared error to target is minimal."""
     cov = np.cov(x.flatten(), target.flatten())
     alpha = cov[0, 1] / (cov[0, 0] + 1e-10)
     beta = target.mean() - alpha * x.mean()
@@ -64,8 +62,6 @@ def detect_spots(
     spacing: tuple[float, float],
     k: float,
 ):
-    """Spot detection with LoG filter and h-maxima and std as threshold."""
-
     sigma = wavelength / (2 * NA) / np.sqrt(2) / (spacing[1] * 1000)
     log_img = -gaussian_laplace(img_as_float32(denoised_slice), sigma=sigma) * sigma**2
     log_img = img_as_uint(
@@ -110,9 +106,6 @@ def refine_spots(
                 )
             except RuntimeError as e:
                 logger.warning(e)
-                logger.info(
-                    f"Skipped spot at {y, x}. Could not compute sub-pixel localization."
-                )
 
     dfs = []
     for roi_id in subpix_spots:
@@ -122,7 +115,6 @@ def refine_spots(
         )
         spot_df["roi_id"] = roi_id
         spot_df["frame"] = frame
-
         dfs.append(spot_df)
 
     spots_for_frame_df = pd.concat(dfs, ignore_index=True)
@@ -140,31 +132,27 @@ def refine_spots(
     )
 
 
-def get_raw_spot_intensity_computer(
-    raw_img: ArrayLike,
-):
-    def raw_spot_intensity_computer(row):
+def get_raw_spot_intensity_computer(raw_img: ArrayLike):
+    def f(row):
         y, x = row[["y", "x"]]
         y, x = int(np.round(y)), int(np.round(x))
+        return np.mean(raw_img[y - 1 : y + 1, x - 1 : x + 1])
 
-        sum_intensity = np.mean(raw_img[y - 1 : y + 1, x - 1 : x + 1])
-
-        return sum_intensity / 9.0
-
-    return raw_spot_intensity_computer
+    return f
 
 
 def detect_spots_in_frame(
-    denoised_slice: ArrayLike,
-    raw_slice: ArrayLike,
-    mask: ArrayLike,
-    frame: int,
-    NA: float,
-    wavelength: int,
-    spacing: tuple[float, float],
-    k: float,
+    denoised_slice,
+    raw_slice,
+    mask,
+    frame,
+    NA,
+    wavelength,
+    spacing,
+    k,
 ):
-    logger.info(f"Processing frame #{frame}.")
+    logger.info(f"Processing frame #{frame}")
+
     spots = detect_spots(
         denoised_slice=denoised_slice,
         mask=mask,
@@ -174,46 +162,41 @@ def detect_spots_in_frame(
         k=k,
     )
 
-    spots_per_roi, roi_labels = assign_spots_to_ROIs(
-        spots=spots,
-        mask=mask,
-    )
+    spots_per_roi, roi_labels = assign_spots_to_ROIs(spots, mask)
 
     spots_for_frame_df = refine_spots(
-        spots_per_roi=spots_per_roi,
-        roi_labels=roi_labels,
-        denoised_slice=denoised_slice,
-        frame=frame,
-        logger=logger,
+        spots_per_roi,
+        roi_labels,
+        denoised_slice,
+        frame,
+        logger,
     )
+
     try:
         spots_for_frame_df["mean_spot_intensity"] = spots_for_frame_df.apply(
             get_raw_spot_intensity_computer(raw_slice), axis=1
         )
-
     except ValueError:
-        print("No spots in frame, skipping frame.")
+        pass
 
     return spots_for_frame_df
 
 
 def detect_spots_in_2DTime(
-    img_file: str,
-    mask_file: str,
-    NA: float,
-    wavelength: int,
-    spacing: tuple[float, float],
-    k: float,
+    img_file,
+    mask_file,
+    NA,
+    wavelength,
+    spacing,
+    k,
 ):
 
-    denoised_img, raw_img, mask = load_data(
-        img_file=img_file,
-        mask_file=mask_file,
-    )
+    denoised_img, raw_img, mask = load_data(img_file, mask_file)
 
     futures = []
     progress = tqdm(total=denoised_img.shape[0], smoothing=0.0, leave=False)
     pool = Pool(8)
+
     for frame in range(denoised_img.shape[0]):
         futures.append(
             pool.apply_async(
@@ -235,39 +218,39 @@ def detect_spots_in_2DTime(
     pool.close()
     pool.join()
 
-    dfs = []
-    for future in futures:
-        dfs.append(future.get())
+    dfs = [f.get() for f in futures]
 
     return pd.concat(dfs)
 
 
 if __name__ == "__main__":
-    with open("spot_detection_config.yaml", "r") as f:
+    config_path = workdir / "spot_detection_config.yaml"
+
+    with open(config_path, "r") as f:
         config = yaml.safe_load(f)
 
-    logger.info(f"Running spot-detection with config: {config}")
+    logger.info(f"Running spot detection: {config}")
 
     img_files = glob(join(config["img_file"], "*.tif"))
 
     for img_file in tqdm(img_files):
-        logger.info(f"Processing file: {img_file}")
         mask_file = join(
             config["mask_file"], basename(img_file).replace(".tif", "_ROIs.tif")
         )
 
-        spots_for_frames = detect_spots_in_2DTime(
-            img_file=img_file,
-            mask_file=mask_file,
-            NA=config["NA"],
-            wavelength=config["wavelength"],
-            spacing=config["spacing"],
-            k=config["k"],
+        spots = detect_spots_in_2DTime(
+            img_file,
+            mask_file,
+            config["NA"],
+            config["wavelength"],
+            config["spacing"],
+            config["k"],
         )
 
         name, _ = os.path.splitext(os.path.basename(img_file))
-        spots_for_frames.to_csv(
-            os.path.join(config["output_dir"], f"{name}_spots.csv"), index=False
+        spots.to_csv(
+            os.path.join(config["output_dir"], f"{name}_spots.csv"),
+            index=False,
         )
 
-    logger.info("Done!")
+    logger.info("Done")

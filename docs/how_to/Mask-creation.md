@@ -37,9 +37,24 @@ WD=runs/mask_creation pixi run iNeuron_zstack_processing
 
 1. For whole cell masks run task "iNeuron_cell_segmentation".
 ```commandline
-WD=runs/mask_creation pixi run "iNeuron_cell_segmentation"
+WD=runs/mask_creation pixi run iNeuron_cell_segmentation
 ```
-For this task the folder structure and names needs to be exactly as in the [example_data] () and the command needs to be executed from the respective experiment subfolder. (Think about whether to change this to providing input and output folders directly.)
+The script expects this folder structure:
+```
+Sample_experiment/
+├── TreatmentFolder1/
+│   ├── Max_projections_separate/
+│   │   └── Halo/
+│   │       └── *.tif
+│   └── ROIs/
+│       ├── Whole_cell/
+│       └── Nucleus/
+├── TreatmentFolder2/
+│   ├── ...
+...
+```
+The input path can either point to the whole experiment or to the specified sub-condition (treatment in this case).
+
 1. For nuclei masks ilastik or any preferred segmentation tool can be used.
 1. Correct nuclei masks and create cytoplasm masks with task "iNeuron_mask_creation".
 ```commandline
@@ -47,6 +62,10 @@ WD=runs/mask_creation pixi run iNeuron_mask_creation
 ```
 1. Final masks can be manually corrected within the same notebook.
 
+Alternative to steps 2-4:  Both nucleus and cytoplasm masks can be created by running task "iNeuron_mask_creation_with_nucleus".
+```commandline
+WD=runs/mask_creation pixi run iNeuron_mask_creation_with_nucleus
+```
 ## Mask creation for iPSC masks
 
 To segment cells and create masks for iPSC data run task "iPSC_mask_creation".
