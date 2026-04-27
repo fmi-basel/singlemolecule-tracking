@@ -53,7 +53,8 @@ Sample_experiment/
 │   ├── ...
 ...
 ```
-The input path can either point to the whole experiment or to the specified sub-condition (treatment in this case).
+The input path can either point to the whole experiment (Sample_experiment in this case) or to the specified sub-condition (TreatmentFolder1 in this case).
+All lower-level sub-folders need to be named exactly as shown in the example, or alternatively the folder names and/or structure needs to be changed directly in the script.
 
 1. For nuclei masks ilastik or any preferred segmentation tool can be used.
 1. Correct nuclei masks and create cytoplasm masks with task "iNeuron_mask_creation".
