@@ -2,12 +2,23 @@ import os
 
 import questionary
 import yaml
+from pathlib import Path
 
 from config import InputData, TrainModel, N2VPredict
 
 GENERATE_TRAIN_DATA_CONFIG = "generate_train_data_config.yaml"
 TRAIN_MODEL_CONFIG = "train_model_config.yaml"
 PREDICT_CONFIG = "predict_config.yaml"
+
+
+def sanitize(obj):
+    if isinstance(obj, Path):
+        return str(obj)
+    if isinstance(obj, dict):
+        return {k: sanitize(v) for k, v in obj.items()}
+    if isinstance(obj, list):
+        return [sanitize(v) for v in obj]
+    return obj
 
 
 def configure_generate_train_data(existing_config: InputData = None) -> InputData:
@@ -214,7 +225,7 @@ def main() -> None:
 
         generate_train_data_config.make_relative_paths()
         with open(generate_train_data, "w") as f:
-            yaml.dump(generate_train_data_config.dict(), f)
+            yaml.safe_dump(sanitize(generate_train_data_config.dict()), f, sort_keys=False)
 
     if "train_model" in create_config_for:
         train_model = os.path.join(os.getcwd(), TRAIN_MODEL_CONFIG)
@@ -229,7 +240,7 @@ def main() -> None:
 
         train_model_config.make_relative_paths()
         with open(train_model, "w") as f:
-            yaml.dump(train_model_config.dict(), f)
+            yaml.safe_dump(sanitize(train_model_config.dict()), f, sort_keys=False)
 
     if "predict" in create_config_for:
         predict = os.path.join(os.getcwd(), PREDICT_CONFIG)
@@ -243,7 +254,7 @@ def main() -> None:
         os.makedirs(predict_config.output_dir, exist_ok=True)
         predict_config.make_relative_paths()
         with open(predict, "w") as f:
-            yaml.dump(predict_config.dict(), f)
+            yaml.safe_dump(sanitize(predict_config.dict()), f, sort_keys=False)
 
 
 if __name__ == "__main__":
