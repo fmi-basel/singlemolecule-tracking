@@ -1,3 +1,4 @@
+import os
 from os.path import basename, splitext, join
 
 import numpy as np
@@ -95,7 +96,10 @@ def move_axes_from_TZYXC(data, axes: str):
 
 
 if __name__ == "__main__":
-    with open("predict_config.yaml", "r") as f:
+
+    config_path = os.path.join("runs/denoising/config", "predict_config.yaml")
+
+    with open(config_path, "r") as f:
         config = N2VPredict(**yaml.safe_load(f))
         config.resolve_paths()
 
