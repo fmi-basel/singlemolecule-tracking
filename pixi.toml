@@ -14,10 +14,11 @@ linux="4.18"
 [tasks]
 source_status = { cmd = 'echo "Found $(git status --porcelain ipa | wc -l) untracked changes in ./ipa." && exit $(git status --porcelain ipa | wc -l)'}
 log_commit = {cmd = 'echo "[$(date -Iseconds)][Executing] $TASK [Git-Commit] $(git rev-parse --verify HEAD)" >> $WD/githash.log', env = {TASK = ""}}
-build_config = { cmd = "mkdir -p $WD ; TASK=BUILD_CONFIG pixi run log_commit ; cd $WD ; pixi run python $PIXI_PROJECT_ROOT/ipa/00_denoising-with-n2v/build_config.py", env = { WD = "runs/example"}, depends-on=["source_status"]}
-generate_data = { cmd = "TASK=GENERATE_DATA pixi run log_commit ; cd $WD ; pixi run -e n2v python $PIXI_PROJECT_ROOT/ipa/00_denoising-with-n2v/generate_train_data_2D.py", env = { WD = "runs/example"}, depends-on=["source_status"]}
-train = { cmd = "TASK=TRAIN pixi run log_commit ; cd $WD ; pixi run -e n2v python $PIXI_PROJECT_ROOT/ipa/00_denoising-with-n2v/train.py", env = { WD = "runs/example"}, depends-on=["source_status"]}
-predict = { cmd = "TASK=PREDICT pixi run log_commit ; cd $WD ; pixi run -e n2v python $PIXI_PROJECT_ROOT/ipa/00_denoising-with-n2v/predict.py", env={WD = "runs/example"}, depends-on=["source_status"]}
+build_config = { cmd = "mkdir -p $WD ; TASK=BUILD_CONFIG pixi run log_commit ; cd $WD ; pixi run python $PIXI_PROJECT_ROOT/ipa/00_denoising-with-n2v/build_config.py", env = { WD = "runs/denoising/config"}, depends-on=["source_status"]}
+generate_data = { cmd = "TASK=GENERATE_DATA pixi run log_commit ; cd $WD ; pixi run -e n2v python $PIXI_PROJECT_ROOT/ipa/00_denoising-with-n2v/generate_train_data_2D.py", env = { WD = "runs/denoising/generate"}, depends-on=["source_status"]}
+train = { cmd = "TASK=TRAIN pixi run log_commit ; cd $WD ; pixi run -e n2v python $PIXI_PROJECT_ROOT/ipa/00_denoising-with-n2v/train.py", env = { WD = "runs/denoising/train"}, depends-on=["source_status"]}
+predict = { cmd = "TASK=PREDICT pixi run log_commit ; cd $WD ; pixi run -e n2v python $PIXI_PROJECT_ROOT/ipa/00_denoising-with-n2v/predict.py", env={WD = "runs/denoising/predict"}, depends-on=["source_status"]}
+predict_gpu = { cmd = "TASK=PREDICT pixi run log_commit ; cd $WD ; pixi run -e n2v_gpu python $PIXI_PROJECT_ROOT/ipa/00_denoising-with-n2v/predict.py", env={WD = "runs/denoising/predict"}, depends-on=["source_status"]}
 submit_job = { cmd = "TASK=SUBMIT_JOB pixi run log_commit ; sbatch ipa/00_denoising-with-n2v/slurm-job_$JOB.sh $ACCOUNT $WD", env = { JOB = "", ACCOUNT = "", WD = ""}, depends-on=["source_status"]}
 
 [tasks.iNeuron_cell_segmentation_config]
@@ -27,7 +28,6 @@ TASK=iNeuron_cell_segmentation_config pixi run log_commit ;
 cd $WD ;
 python $PIXI_PROJECT_ROOT/ipa/01_mask-creation-preprocessing/build_config_cellpose.py
 """
-#depends-on=["source_status"]
 
 [tasks.iNeuron_cell_segmentation]
 cmd = """
@@ -68,13 +68,11 @@ mkdir -p $WD ;
 TASK=tracking_config pixi run log_commit ;
 python $PIXI_PROJECT_ROOT/ipa/03_spot-tracking/build_config.py --outdir $WD
 """
-#env = { WD="" }
 
 [tasks.tracking]
 cmd = """
 python $PIXI_PROJECT_ROOT/ipa/03_spot-tracking/run_tracking.py --workdir $WD
 """
-#env = { WD="" }
 depends-on = ["tracking_config"]
 
 [dependencies]
@@ -232,10 +230,22 @@ clean = "nbdev_clean --clear_all"
 platforms = ["linux-64"]
 system-requirements = { cuda = "11" }
 channels = ["conda-forge"]
-dependencies = { tensorflow="*"}
+
+[feature.n2v.dependencies]
+typing-extensions = "<4.6"
 
 [feature.n2v.pypi-dependencies]
 n2v = ">=0.3.2,<0.3.3"
+
+[feature.n2v.target.osx-arm64.pypi-dependencies]
+tensorflow-macos = ">=2.13,<2.14"
+tensorflow-metal = "*"
+
+[feature.n2v.target.osx-64.pypi-dependencies]
+tensorflow = ">=2.10,<2.14"
+
+[feature.n2v.target.linux-64.pypi-dependencies]
+tensorflow = ">=2.10,<2.14"
 
 [feature.cellpose]
 platforms = ["linux-64"]
@@ -270,7 +280,8 @@ docs = { features=["docs"], solve-group="default" }
 dev = { features=["dev"], solve-group="default" }
 nextflow = { features=["nextflow"], solve-group="default" }
 jupyter = { features=["jupyter"], solve-group="default" }
-n2v = {features=["n2v", "cuda"], solve-group="default" }
+n2v = {features=["n2v"], solve-group="n2v" }
+n2v-gpu = {features=["n2v", "cuda"], solve-group="n2v" }
 nbdev = {features=["nbdev"], no-default-feature = true}
-cellpose = {features=["cellpose", "pytorch"], no-default-feature = true}
-cellpose-gpu = {features=["cellpose", "pytorch", "pytorch-gpu"], no-default-feature = true}
+cellpose = {features=["cellpose", "pytorch"], no-default-feature = true, solve-group="cellpose"}
+cellpose-gpu = {features=["cellpose", "pytorch", "pytorch-gpu"], no-default-feature = true, solve-group="cellpose"}

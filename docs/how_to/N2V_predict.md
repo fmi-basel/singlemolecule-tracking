@@ -31,6 +31,6 @@ WD=runs/denoising/predict pixi run predict
 
 ### Option 2: Run it on a cluster
 ```commandline
-WD=runs/denoising/predict JOB=predict ACCOUNT=account-name pixi run submit_job
+WD=runs/denoising/predict JOB=predict_gpu ACCOUNT=account-name pixi run submit_job
 ```
 Replace `account-name` with your cluster account name.
