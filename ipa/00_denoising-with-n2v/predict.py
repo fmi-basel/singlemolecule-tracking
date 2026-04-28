@@ -97,7 +97,8 @@ def move_axes_from_TZYXC(data, axes: str):
 
 if __name__ == "__main__":
 
-    config_path = os.path.join("runs/denoising/config", "predict_config.yaml")
+    repo_root = os.environ.get("PIXI_PROJECT_ROOT", os.getcwd())
+    config_path = os.path.join(repo_root, "runs/denoising/config/predict_config.yaml")
 
     with open(config_path, "r") as f:
         config = N2VPredict(**yaml.safe_load(f))
