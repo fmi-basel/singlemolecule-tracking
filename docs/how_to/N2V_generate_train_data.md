@@ -3,7 +3,7 @@
 ## Build Config
 
 ```commandline
-WD=runs/denoising/config pixi run build_config
+pixi run build_config
 ```
 Navigate with the arrow keys to the task for which you want to build a config file and select it with the space key.
 Input parameters to build the config file are:
@@ -23,7 +23,7 @@ Input parameters to build the config file are:
 
 ### Option 1: Run it locally
 ```commandline
-WD=runs/denoising/generate pixi run generate_data
+pixi run generate_data
 ```
 
 ### Option 2: Run it on a cluster
