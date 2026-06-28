@@ -47,7 +47,12 @@ def train_model(
 
 
 if __name__ == "__main__":
-    with open("train_model_config.yaml", "r") as f:
+    from pathlib import Path
+
+    ROOT = Path(__file__).resolve().parents[2]
+    config_path = ROOT / "runs/denoising/config/train_model_config.yaml"
+
+    with open(config_path, "r") as f:
         config = TrainModel(**yaml.safe_load(f))
         config.resolve_paths()
 

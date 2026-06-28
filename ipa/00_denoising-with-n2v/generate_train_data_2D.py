@@ -112,7 +112,10 @@ def move_axes_to_TZYXC(data, axes: str):
 
 if __name__ == "__main__":
 
-    with open("generate_train_data_config.yaml", "r") as f:
+    ROOT = pathlib.Path(__file__).resolve().parents[2]
+    config_path = ROOT / "runs/denoising/config/generate_train_data_config.yaml"
+
+    with open(config_path, "r") as f:
         config = InputData(**yaml.safe_load(f))
         config.resolve_paths()
 
