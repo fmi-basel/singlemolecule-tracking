@@ -221,6 +221,7 @@ def main() -> None:
 
         generate_train_data_config = configure_generate_train_data(existing_config)
 
+        generate_train_data_config.resolve_paths()
         os.makedirs(generate_train_data_config.output_dir, exist_ok=True)
 
         generate_train_data_config.make_relative_paths()
@@ -236,6 +237,7 @@ def main() -> None:
 
         train_model_config = configure_train_model(existing_config)
 
+        train_model_config.resolve_paths()
         os.makedirs(train_model_config.output_dir, exist_ok=True)
 
         train_model_config.make_relative_paths()
@@ -251,6 +253,7 @@ def main() -> None:
 
         predict_config = configure_predict(existing_config)
 
+        predict_config.resolve_paths()
         os.makedirs(predict_config.output_dir, exist_ok=True)
         predict_config.make_relative_paths()
         with open(predict, "w") as f:
