@@ -33,6 +33,8 @@ Everytime you open a new shell you need to initialize it with the correct enviro
 source init.sh
 ```
 
+## Execution
+
 For Intel Macs, run the code from the main branch, for Apple Silicon Macs run the code from the osxarm64 branch.
 
 To see detailed documentation on the available tasks and how to execute them run:
