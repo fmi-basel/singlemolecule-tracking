@@ -1,9 +1,0 @@
-axes: ZYX
-input_dir: ../../../../tungstenfs/scratch/gchao/waldsimo/Franklin/SoRa imaging/DAPI
-num_patches_per_img: 1
-output_dir: ../../Data/gchao/n2v-testing
-patch_shape:
-- 128
-- 128
-pattern: .*.tif
-xy_pixelsize_um: 0.114

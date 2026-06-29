@@ -152,7 +152,10 @@ infrastructure/.tmp_*/**
 # Ignore the runs and output folders
 runs/
 slurm_output/
+ipa/05_other
+ipa/Development
 
 # Ignore .DS_Store files everywhere
 .DS_Store
 **/.DS_Store
+.DS_Store

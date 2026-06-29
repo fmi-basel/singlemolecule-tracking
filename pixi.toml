@@ -1,10 +1,10 @@
-[project]
+[workspace]
 name = "Single Molecule Tracking"
 version = "0.1.0"
 description = "Add a short description here"
 authors = ["Tim-Oliver Buchholz <tim-oliver.buchholz@fmi.ch>"]
 channels = ["conda-forge", "bioconda"]
-platforms = ["linux-64"]
+platforms = ["linux-64", "osx-64", "osx-arm64"]
 
 [system-requirements]
 # Minimum linux version for this project to work.
@@ -14,27 +14,86 @@ linux="4.18"
 [tasks]
 source_status = { cmd = 'echo "Found $(git status --porcelain ipa | wc -l) untracked changes in ./ipa." && exit $(git status --porcelain ipa | wc -l)'}
 log_commit = {cmd = 'echo "[$(date -Iseconds)][Executing] $TASK [Git-Commit] $(git rev-parse --verify HEAD)" >> $WD/githash.log', env = {TASK = ""}}
-build_config = { cmd = "mkdir -p $WD ; TASK=BUILD_CONFIG pixi run log_commit ; cd $WD ; pixi run python $PIXI_PROJECT_ROOT/ipa/n2v/build_config.py", env = { WD = "runs/example"}, depends-on=["source_status"]}
-generate_data = { cmd = "TASK=GENERATE_DATA pixi run log_commit ; cd $WD ; pixi run -e n2v python $PIXI_PROJECT_ROOT/ipa/n2v/generate_train_data_2D.py", env = { WD = "runs/example"}, depends-on=["source_status"]}
-train = { cmd = "TASK=TRAIN pixi run log_commit ; cd $WD ; pixi run -e n2v python $PIXI_PROJECT_ROOT/ipa/n2v/train.py", env = { WD = "runs/example"}, depends-on=["source_status"]}
-predict = { cmd = "TASK=PREDICT pixi run log_commit ; cd $WD ; pixi run -e n2v python $PIXI_PROJECT_ROOT/ipa/n2v/predict.py", env={WD = "runs/example"}, depends-on=["source_status"]}
-submit_job = { cmd = "TASK=SUBMIT_JOB pixi run log_commit ; sbatch ipa/n2v/slurm-job_$JOB.sh $ACCOUNT $WD", env = { JOB = "", ACCOUNT = "", WD = ""}, depends-on=["source_status"]}
+build_config = { cmd = "mkdir -p $WD ; TASK=BUILD_CONFIG pixi run log_commit ; cd $WD ; pixi run python $PIXI_PROJECT_ROOT/ipa/00_denoising-with-n2v/build_config.py", env = { WD = "runs/denoising/config"}, depends-on=["source_status"]}
+generate_data = { cmd = "mkdir -p $WD ; TASK=GENERATE_DATA pixi run log_commit ; cd $WD ; pixi run -e n2v python $PIXI_PROJECT_ROOT/ipa/00_denoising-with-n2v/generate_train_data_2D.py", env = { WD = "runs/denoising/generate"}, depends-on=["source_status"]}
+train = { cmd = "mkdir -p $WD ; TASK=TRAIN pixi run log_commit ; cd $WD ; pixi run -e n2v python $PIXI_PROJECT_ROOT/ipa/00_denoising-with-n2v/train.py", env = { WD = "runs/denoising/train"}, depends-on=["source_status"]}
+predict = { cmd = "mkdir -p $WD ; TASK=PREDICT pixi run log_commit ; cd $WD ; pixi run -e n2v python $PIXI_PROJECT_ROOT/ipa/00_denoising-with-n2v/predict.py", env={WD = "runs/denoising/predict"}, depends-on=["source_status"]}
+predict_gpu = { cmd = "mkdir -p $WD ; TASK=PREDICT pixi run log_commit ; cd $WD ; pixi run -e n2v_gpu python $PIXI_PROJECT_ROOT/ipa/00_denoising-with-n2v/predict.py", env={WD = "runs/denoising/predict"}, depends-on=["source_status"]}
+submit_job = { cmd = "TASK=SUBMIT_JOB pixi run log_commit ; sbatch ipa/00_denoising-with-n2v/slurm-job_$JOB.sh $ACCOUNT $WD", env = { JOB = "", ACCOUNT = "", WD = ""}, depends-on=["source_status"]}
+
+[tasks.iNeuron_cell_segmentation_config]
+cmd = """
+mkdir -p $WD ;
+TASK=iNeuron_cell_segmentation_config pixi run log_commit ;
+cd $WD ;
+python $PIXI_PROJECT_ROOT/ipa/01_mask-creation-preprocessing/build_config_cellpose.py
+"""
+
+[tasks.iNeuron_cell_segmentation]
+cmd = """
+cd $WD ;
+python $PIXI_PROJECT_ROOT/ipa/01_mask-creation-preprocessing/cellpose_predict.py --config cellpose_config.yaml
+"""
+depends-on = [ "iNeuron_cell_segmentation_config" ]
+
+[tasks.spot_detection_config]
+cmd = """
+mkdir -p $WD ;
+TASK=spot_detection_config pixi run log_commit ;
+python $PIXI_PROJECT_ROOT/ipa/02_spot-detection/build_config.py --outdir $WD
+"""
+
+[tasks.spot_detection]
+cmd = """
+python $PIXI_PROJECT_ROOT/ipa/02_spot-detection/run_spot_detection.py --workdir $WD
+"""
+depends-on = [ "spot_detection_config" ]
+
+[tasks.spot_detection_with_cytoskeleton_config]
+cmd = """
+mkdir -p $WD ;
+TASK=spot_detection_with_cytoskeleton_config pixi run log_commit ;
+python $PIXI_PROJECT_ROOT/ipa/02_spot-detection/build_config_with_cytoskeleton.py --outdir $WD
+"""
+
+[tasks.spot_detection_with_cytoskeleton]
+cmd = """
+python $PIXI_PROJECT_ROOT/ipa/02_spot-detection/run_spot_detection_with_cytoskeleton.py --workdir $WD
+"""
+depends-on = [ "spot_detection_with_cytoskeleton_config" ]
+
+[tasks.tracking_config]
+cmd = """
+mkdir -p $WD ;
+TASK=tracking_config pixi run log_commit ;
+python $PIXI_PROJECT_ROOT/ipa/03_spot-tracking/build_config.py --outdir $WD
+"""
+
+[tasks.tracking]
+cmd = """
+python $PIXI_PROJECT_ROOT/ipa/03_spot-tracking/run_tracking.py --workdir $WD
+"""
+depends-on = ["tracking_config"]
 
 [dependencies]
-python = ">=3.9,<3.13"
+python = ">=3.9,<3.10"
 tqdm = ">=4.66.2,<4.67"
-tifffile = ">=2024.5.10,<2024.6"
+tifffile = "==2023.2.28"
 imagecodecs = {version="*", channel="conda-forge"}
 libjpeg-turbo = {version="*", channel="conda-forge"}
 pyyaml = ">=6.0.1,<6.1"
-pydantic = ">=2.7.1,<3.0"
-scikit-image = ">=0.22.0,<0.23"
+pydantic = "==1.10.8"
+scikit-image = "==0.20.0"
 questionary = ">=2.0.1,<2.1"
 bokeh = ">=3.4.1,<3.5"
-dask-image = ">=2024.5.3,<2024.6"
-dask = ">=2024.5.1,<2024.6"
-distributed = ">=2024.5.1,<2024.6"
-pixi-pycharm = ">=0.0.5,<0.1"
+distributed = "==2023.5.1"
+scikit-learn = "==1.3.2"
+scipy = "==1.9.1"
+seaborn-base = "==0.12.2"
+trackpy = "==0.6.1"
+numpy = "==1.24.3"
+matplotlib = "==3.7.1"
+cellpose = "*"
 
 [pypi-dependencies]
 faim-ipa = ">=0.3.5,<0.4"
@@ -64,9 +123,102 @@ nextflow = ">=23.10.1,<23.11"
 
 [feature.jupyter.dependencies]
 jupyter = ">=1.0.0,<1.1"
+napari = "==0.4.17"
+pyqt = "==5.15.7"
 
 [feature.jupyter.tasks]
 jupyter = "jupyter lab"
+
+[feature.jupyter.tasks.organoid_mask_creation]
+cmd = """
+cp $PIXI_PROJECT_ROOT/ipa/01_mask-creation-preprocessing/Organoid_mask_creation.ipynb $WD ;
+cd $WD ;
+jupyter lab Organoid_mask_creation.ipynb
+"""
+
+[feature.jupyter.tasks.iNeuron_zstack_processing]
+cmd = """
+cp $PIXI_PROJECT_ROOT/ipa/01_mask-creation-preprocessing/iNeuron_zstack_processing.ipynb $WD ;
+cd $WD ;
+jupyter lab iNeuron_zstack_processing.ipynb
+"""
+
+[feature.jupyter.tasks.iNeuron_single_slices]
+cmd = """
+cp $PIXI_PROJECT_ROOT/ipa/01_mask-creation-preprocessing/iNeuron_single_slices.ipynb $WD ;
+cd $WD ;
+jupyter lab iNeuron_single_slices.ipynb
+"""
+
+[feature.jupyter.tasks.iNeuron_mask_creation]
+cmd = """
+cp $PIXI_PROJECT_ROOT/ipa/01_mask-creation-preprocessing/iNeuron_mask_creation.ipynb $WD ;
+cd $WD ;
+jupyter lab iNeuron_mask_creation.ipynb
+"""
+
+[feature.jupyter.tasks.iNeuron_mask_creation_with_nucleus]
+cmd = """
+cp $PIXI_PROJECT_ROOT/ipa/01_mask-creation-preprocessing/iNeuron_mask_creation_with_nucleus.ipynb $WD ;
+cd $WD ;
+jupyter lab iNeuron_mask_creation_with_nucleus.ipynb
+"""
+
+[feature.jupyter.tasks.iPSC_mask_creation]
+cmd = """
+cp $PIXI_PROJECT_ROOT/ipa/01_mask-creation-preprocessing/iPSC_mask_creation.ipynb $WD ;
+cd $WD ;
+jupyter lab iPSC_mask_creation.ipynb
+"""
+
+[feature.jupyter.tasks.vascular-progenitors_mask_creation]
+cmd = """
+cp $PIXI_PROJECT_ROOT/ipa/01_mask-creation-preprocessing/vascular-progenitors_mask_creation.ipynb $WD ;
+cd $WD ;
+jupyter lab vascular-progenitors_mask_creation.ipynb
+"""
+
+[feature.jupyter.tasks.merge_raw_denoised_image]
+cmd = """
+cp $PIXI_PROJECT_ROOT/ipa/01_mask-creation-preprocessing/Merge_raw_denoised_image.ipynb $WD ;
+cd $WD ;
+jupyter lab Merge_raw_denoised_image.ipynb
+"""
+
+[feature.jupyter.tasks.file_renaming]
+cmd = """
+cp $PIXI_PROJECT_ROOT/ipa/01_mask-creation-preprocessing/File_renaming.ipynb $WD ;
+cd $WD ;
+jupyter lab File_renaming.ipynb
+"""
+
+[feature.jupyter.tasks.visualization]
+cmd = """
+cp $PIXI_PROJECT_ROOT/ipa/04_visualization/Spot-detection-tracking_visualization.ipynb $WD ;
+cd $WD ;
+jupyter lab Spot-detection-tracking_visualization.ipynb
+"""
+
+[feature.jupyter.tasks.calculate_distance-to-nucleus]
+cmd = """
+cp $PIXI_PROJECT_ROOT/ipa/05_feature-extraction/Calculate_distance_to_nucleus.ipynb $WD ;
+cd $WD ;
+jupyter lab Calculate_distance_to_nucleus.ipynb
+"""
+
+[feature.jupyter.tasks.cell_compartments]
+cmd = """
+cp $PIXI_PROJECT_ROOT/ipa/05_feature-extraction/Cell_compartments_nuc_dist.ipynb $WD ;
+cd $WD ;
+jupyter lab Cell_compartments_nuc_dist.ipynb
+"""
+
+[feature.jupyter.tasks.nuc_dist_edge_dist]
+cmd = """
+cp $PIXI_PROJECT_ROOT/ipa/05_feature-extraction/Nuc_dist_edge_dist.ipynb $WD ;
+cd $WD ;
+jupyter lab Nuc_dist_edge_dist.ipynb
+"""
 
 [feature.nbdev.dependencies]
 nbdev = ">=2.2.10,<2.3"
@@ -78,12 +230,25 @@ clean = "nbdev_clean --clear_all"
 platforms = ["linux-64"]
 system-requirements = { cuda = "11" }
 channels = ["conda-forge"]
-dependencies = { tensorflow-gpu="*"}
+
+[feature.n2v.dependencies]
+typing-extensions = "<4.6"
 
 [feature.n2v.pypi-dependencies]
 n2v = ">=0.3.2,<0.3.3"
 
+[feature.n2v.target.osx-arm64.pypi-dependencies]
+tensorflow-macos = ">=2.13,<2.14"
+tensorflow-metal = "*"
+
+[feature.n2v.target.osx-64.pypi-dependencies]
+tensorflow = ">=2.10,<2.14"
+
+[feature.n2v.target.linux-64.pypi-dependencies]
+tensorflow = ">=2.10,<2.14"
+
 [feature.cellpose]
+platforms = ["linux-64"]
 channels = ["nvidia", "pytorch", "conda-forge"]
 
 [feature.cellpose.dependencies]
@@ -111,11 +276,12 @@ system-requirements = { cuda = "11" }
 pytorch-cuda = {version="11.8.*", channel="pytorch"}
 
 [environments]
-docs = ["docs"]
-dev = ["dev"]
-nextflow = ["nextflow"]
-jupyter = ["jupyter"]
+docs = { features=["docs"], solve-group="default" }
+dev = { features=["dev"], solve-group="default" }
+nextflow = { features=["nextflow"], solve-group="default" }
+jupyter = { features=["jupyter"], solve-group="default" }
+n2v = {features=["n2v"], solve-group="n2v" }
+n2v-gpu = {features=["n2v", "cuda"], solve-group="n2v" }
 nbdev = {features=["nbdev"], no-default-feature = true}
-n2v = ["n2v", "cuda"]
-cellpose = ["cellpose", "pytorch"]
-cellpose-gpu = ["cellpose", "pytorch", "pytorch-gpu"]
+cellpose = {features=["cellpose", "pytorch"], no-default-feature = true, solve-group="cellpose"}
+cellpose-gpu = {features=["cellpose", "pytorch", "pytorch-gpu"], no-default-feature = true, solve-group="cellpose"}

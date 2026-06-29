@@ -1,2 +1,4 @@
 # How-to Guides
-This part of the documentation contains how-to guides. They are meant for users who are already familiar with the project and want to accomplish a specific task. The guides should allow to complete the task, but not provide extensive background information. For more detailed information, refer to the [Diataxis - How-to Guides](https://diataxis.fr/how-to-guides/).
+Here you can find the explanations and necessary commands to perform specific tasks. This includes denoising, pre-processing steps, spot detection, tracking and feature extractions.
+
+The tasks needs to be executed from the base folder of the repo and folder structure needs to be followed for the exact commands described.
