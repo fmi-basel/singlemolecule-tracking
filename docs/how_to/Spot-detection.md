@@ -10,7 +10,7 @@ Input parameters are:
 
 1. k: multiplication factor for hmax threshold 
 
-For input requirements refer to the [spot_detection_script] (). k has to be empirically tested and depends on the dataset. For the available data set, threshold factors between 3 and 6 have been used.
+k has to be empirically tested and depends on the dataset. For the available data set, threshold factors between 3 and 6 have been used.
 
 ## Spot detection without cytoskeletal stain intensities
 
