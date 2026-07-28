@@ -94,6 +94,7 @@ trackpy = "==0.6.1"
 numpy = ">=1.25,<2"
 matplotlib = ">=3.7.1,<4"
 cellpose = "*"
+nd2 = ">=0.10.3,<0.11"
 
 [pypi-dependencies]
 faim-ipa = ">=0.3.5,<0.4"
@@ -125,6 +126,9 @@ nextflow = ">=23.10.1,<23.11"
 jupyter = ">=1.0.0,<1.1"
 napari = "==0.4.17"
 pyqt = "==5.15.7"
+
+[feature.jupyter.pypi-dependencies]
+lxml_html_clean = "*"
 
 [feature.jupyter.tasks]
 jupyter = "jupyter lab"
