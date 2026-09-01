@@ -1,0 +1,18 @@
+"NDInfoFile", Version 1.0
+"Description", File recreated from images.
+"StartTime1", 20241016 13:06:43.990
+"DoTimelapse", FALSE
+"DoStage", FALSE
+"DoWave", TRUE
+"NWavelengths", 3
+"WaveName1", "conf640"
+"WaveDoZ1", TRUE
+"WaveName2", "conf561"
+"WaveDoZ2", TRUE
+"WaveName3", "conf488"
+"WaveDoZ3", TRUE
+"DoZSeries", TRUE
+"NZSteps", 17
+"ZStepSize", 0.5
+"WaveInFileName", TRUE
+"EndFile"
