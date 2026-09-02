@@ -2,6 +2,8 @@
 
 This package is a compilation of tasks revolving around single molecule tracking in diverse iPSC-derived cell types. It involves image restoration with denoising, cell mask generation, spot detection, tracking and distance feature extractions.
 
+Code was tested on Mac operating systems Intel and Apple Silicon.
+
 ## Installation
 
 The base dependencies for this project are managed with pixi. Please install pixi into infrastructure/apps/pixi by executing:
@@ -14,7 +16,8 @@ mkdir -p "$TMP_DIR"
 curl -fsSL https://pixi.sh/install.sh | bash
 ```
 
-and initialize your shell accordingly (see below). For detailed installation instructions visit pixi.sh.
+and initialize your shell accordingly (see below). For detailed installation instructions visit pixi.sh. 
+Installation should run within a few minutes.
 
 ### Linux
 
@@ -33,12 +36,16 @@ Everytime you open a new shell you need to initialize it with the correct enviro
 source init.sh
 ```
 
-## Execution
+## Execution and demo
 
 For Intel Macs, run the code from the main branch, for Apple Silicon Macs run the code from the osxarm64 branch.
+
+Example data and expected output, as well as input parameters for spot detection and tracking, can be found in the 'demo' folder.
 
 To see detailed documentation on the available tasks and how to execute them run:
 ```shell
 pixi run show_docs
 ```
 and open the link.
+
+Each task should run within a few minutes given the provided demo data.
